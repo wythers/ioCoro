@@ -1,2 +1,5 @@
 # iocoro
-Iocoro is a lib of cpp20 coroutines with io_uring.
+iocoro is a lib of cpp20 coroutine with io_uring.  
+
+The [document-coro](https://www.scs.stanford.edu/~dm/blog/c++-coroutines.pdf) provides CppCoroutines details  
+and [ducument-uring](https://kernel.dk/io_uring.pdf) io_uring.
