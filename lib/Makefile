@@ -3,7 +3,7 @@ vpath %.cpp ../src
 
 libiocoro.a: objects
 
-objects: reactor.o socket.o iocoro_syscall_impl.o iocoro_syscall.o
+objects: random.o reactor.o socket.o iocoro_syscall_impl.o iocoro_syscall.o
 
 iocoro_syscall.o: iocoro_syscall.cpp iocoro_syscall_impl.o socket.o
 
@@ -12,6 +12,8 @@ iocoro_syscall_impl.o: iocoro_syscall_impl.cpp socket.o
 socket.o: socket.cpp reactor.o
 
 reactor.o: reactor.cpp
+
+random.o: random.cpp
 
 
 %.a: 

@@ -1,12 +1,16 @@
 #pragma once
 
+#pragma once
+
 #include <random>
+#include <unordered_map>
+#include <vector>
 
-static inline std::random_device gRandomDevice;
-static inline std::mt19937 mt(gRandomDevice());
+using std::unordered_map;
+using std::vector;
 
-inline int
-RandomInt(int left, int right)
-{
-  return std::uniform_int_distribution<int>{ left, right }(mt);
-}
+int
+RandomInt(const int inFirst, const int inLast);
+
+vector<int>
+RandomRange(int size, int range);
