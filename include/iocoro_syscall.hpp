@@ -11,8 +11,6 @@ struct ioCoroSyscall
   bool await_suspend(std::coroutine_handle<> h) { return true; }
 
   void await_resume() {}
-
-  mutex local_mtx{};
 };
 
 struct ioCoroRead : ioCoroSyscall
@@ -22,7 +20,6 @@ struct ioCoroRead : ioCoroSyscall
 
   ssize_t await_resume()
   {
-    lock_guard<mutex> locked(local_mtx);
     return total;
   }
 
@@ -57,7 +54,6 @@ struct ioCoroWrite : ioCoroSyscall
 
   ssize_t await_resume()
   {
-    lock_guard<mutex> locked(local_mtx);
     return total;
   }
 

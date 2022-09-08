@@ -5,7 +5,6 @@ using namespace ioCoro;
 bool
 ioCoroRead::await_suspend(std::coroutine_handle<> h)
 {
-  lock_guard<mutex> locked(local_mtx);
   ssize_t ret = 0;
   for (;;) {
     ret = ::read(m_s.GetFd(), buf, len);
@@ -51,8 +50,6 @@ ioCoroRead::await_suspend(std::coroutine_handle<> h)
 bool
 ioCoroWrite::await_suspend(std::coroutine_handle<> h)
 {
-  lock_guard<mutex> locked(local_mtx);
-
   int ret = 0;
   for (;;) {
     /**
@@ -101,8 +98,6 @@ ioCoroWrite::await_suspend(std::coroutine_handle<> h)
 bool
 ioCoroConnect::await_suspend(std::coroutine_handle<> h)
 {
-  lock_guard<mutex> locked(local_mtx);
-
   struct sockaddr_in address;
   memset(&address, 0, sizeof(address));
   address.sin_family = AF_INET;
