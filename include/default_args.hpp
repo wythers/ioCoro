@@ -3,9 +3,7 @@
 /**
  * 
  */
-#define THREADS_NUM  4
-
-// std::thread::hardware_concurrency()*2
+#define THREADS_NUM std::thread::hardware_concurrency()*2
 
 
 /**
@@ -35,7 +33,7 @@
 /**
  * 
  */
-#define PASSIVE EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET  |EPOLLIN 
+#define PASSIVE EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET | EPOLLIN 
 
 
 /**

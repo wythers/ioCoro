@@ -11,7 +11,7 @@ int main()
 
         client.Run();       
 
- //       client.join();    
+        client.join();    
 }
 
 

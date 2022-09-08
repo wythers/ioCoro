@@ -10,4 +10,4 @@ echo_server: echo_server.cpp
 
 .PHONY: clean
 clean:
-	$(RM) echo_client echo_server
+	@$(RM) echo_client echo_server
