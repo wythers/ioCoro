@@ -12,4 +12,4 @@ endef
 
 %: %.cpp
 	@$(SAY) cc -o $@
-	@g++ -pthread -fcoroutines -latomic -Wall -std=c++20 -o $@ $^ -liocoro
+	@g++ -pthread -fcoroutines -latomic -Wall -std=c++20 -O3 -o $@ $^ -liocoro
