@@ -1,6 +1,5 @@
 #include "random.hpp"
 
-
 static std::random_device gRandomDevice{};
 static std::mt19937 mt(gRandomDevice());
 
@@ -15,7 +14,7 @@ vector<int>
 RandomRange(int size, int range)
 {
   unordered_map<int, int> hash;
-	vector<int> selected;
+  vector<int> selected;
 
   for (int i = 0; i < range; ++i) {
     int r = RandomInt(0, size - i);
