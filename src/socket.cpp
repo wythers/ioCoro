@@ -24,7 +24,7 @@ Socket::Socket(Ios& ios)
     ev.data.ptr = static_cast<void*>(&(m_object_ptr->Ops));
     ret = epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, fd, &ev);
     if (ret < 0)
-      throw_exception("fd registered failed");
+      m_state = update_error();
 
     Hide();
     m_ios->m_sock_num.fetch_add(1, rx);
@@ -64,7 +64,7 @@ Socket::Socket(Ios& ios, SocketImpl& impl, Special)
   int ret = 0;
   ret = epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, m_fd_copy, &ev);
   if (ret < 0)
-    throw_exception("fd registered failed");
+    m_state = update_error();
 
   Hide();
   m_ios->m_sock_num.fetch_add(1, rx);
@@ -75,9 +75,7 @@ Socket::~Socket()
   if (m_object_ptr && !rx_load(m_object_ptr->m_hided)) {
     int fd = m_fd_copy;
     Dealloc(m_ios->m_objects, m_object_ptr);
-    int ret = epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, fd, 0);
-    if (ret)
-      throw_exception("fd deregistered failed");
+    epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, fd, 0);
 
     ::close(fd);
 
