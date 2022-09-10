@@ -3,6 +3,7 @@
                 "*.ipp": "cpp",
                 "coroutine": "cpp",
                 "string_view": "cpp",
-                "*.tcc": "cpp"
+                "*.tcc": "cpp",
+                "iostream": "cpp"
         }
 }

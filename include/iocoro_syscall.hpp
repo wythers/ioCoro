@@ -82,7 +82,7 @@ struct ioCoroConnect : ioCoroSyscall
 
 struct ioCoroReadUntil : ioCoroSyscall
 {
-  ioCoroReadUntil(Socket& inS, char* inBuf, ssize_t inLen, char const* inDelim)
+  ioCoroReadUntil(Socket& inS, void* inBuf, ssize_t inLen, char const* inDelim)
     : ioCoroSyscall{}
     , m_s(inS)
     , buf(inBuf)
