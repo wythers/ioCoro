@@ -7,7 +7,7 @@
 #include "mm_order.hpp"
 #include "socket_impl.hpp"
 
-using std::tuple;
+using std::string_view;
 
 namespace ioCoro {
 
@@ -91,6 +91,12 @@ public:
    * using linux syscall, right?
    */
   bool Read(void*& buf, ssize_t& len, ssize_t& total);
+  bool ReadUntil(void*& buf,
+                 ssize_t& len,
+                 ssize_t& total,
+                 char const* delim,
+                 int& offset,
+                 void const*& pos);
 
   bool Write(void const*& buf, ssize_t& len, ssize_t& total);
 

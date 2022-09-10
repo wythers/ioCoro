@@ -48,6 +48,74 @@ ioCoroRead::await_suspend(std::coroutine_handle<> h)
 }
 
 bool
+ioCoroReadUntil::await_suspend(std::coroutine_handle<> h)
+{
+  ssize_t ret = 0;
+  int off = strlen(delim);
+  string_view checker;
+  size_t position = 0;
+  for (;;) {
+    ret = ::read(m_s.GetFd(), buf, len);
+
+    if (ret == 0) {
+      m_s.UpdateState(errors::at_eof);
+      return false;
+    }
+
+    if (ret == -1) {
+      if (errno == errors::try_again) {
+        errno = 0;
+        Ios& ios = m_s.GetContext();
+        SocketImpl& impl = m_s.GetData();
+
+        impl.Task = Alloc<CompleteOperation<ReadUntilOperation>>(
+          h, m_s, buf, len, delim, offset, pos, total);
+
+        rel_store(impl.Ops.m_to_do, true);
+
+        epoll_event ev{};
+        ev.events = PASSIVE;
+        ev.data.ptr = static_cast<void*>(&(impl.Ops));
+
+        epoll_ctl(ios.m_reactor.GetFd(), EPOLL_CTL_MOD, m_s.GetFd(), &ev);
+
+        return true;
+      } else {
+        m_s.UpdateState();
+        return false;
+      }
+    }
+
+    total += ret;
+    if (offset)
+      checker = { static_cast<char*>(buf) - off + 1,
+                  static_cast<size_t>(ret + off - 1) };
+    else
+      checker = { static_cast<char*>(buf), static_cast<size_t>(ret) };
+
+    ++offset;
+
+    position = checker.find(delim, 0, off);
+
+    if (position != string_view::npos) {
+      pos = &checker[position];
+      return false;
+    }
+
+    if (ret == len) {
+
+      if (position == string_view::npos)
+        m_s.UpdateState(errors::no_buffer_space);
+
+      return false;
+    }
+
+    buf = static_cast<char*>(buf) + ret;
+    len -= ret;
+  }
+}
+
+bool
 ioCoroWrite::await_suspend(std::coroutine_handle<> h)
 {
   int ret = 0;

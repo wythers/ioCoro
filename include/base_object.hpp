@@ -14,10 +14,14 @@ namespace ioCoro {
 class SeviceModelBase
 {
   friend class Socket;
+
   friend struct AcceptOperation;
   friend struct ReadOperation;
+  friend struct ReadUntilOperation;
   friend struct WriteOperation;
+
   friend struct ioCoroRead;
+  friend struct ioCoroReadUntil;
   friend struct ioCoroWrite;
   friend struct ioCoroConnect;
 

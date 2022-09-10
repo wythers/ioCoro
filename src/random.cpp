@@ -1,10 +1,12 @@
 #include "random.hpp"
 
+using namespace ioCoro;
+
 static std::random_device gRandomDevice{};
 static std::mt19937 mt(gRandomDevice());
 
 int
-RandomInt(const int inFirst, const int inLast)
+ioCoro::RandomInt(const int inFirst, const int inLast)
 {
   std::uniform_int_distribution<int> distribution(inFirst, inLast);
   return distribution(mt);

@@ -304,6 +304,65 @@ struct WriteOperation : MetaOperation
   ssize_t& total;
 };
 
+struct ReadUntilOperation : MetaOperation
+{
+  ReadUntilOperation(Func_type inF,
+                     Socket& inS,
+                     void*& inBuf,
+                     ssize_t& inLen,
+                     char const* inDelim,
+                     int& inOffset,
+                     void const*& inPos,
+                     ssize_t& inTotal)
+    : MetaOperation{ inF, &perform }
+    , m_s(inS)
+    , buf(inBuf)
+    , len(inLen)
+    , delim(inDelim)
+    , offset(inOffset)
+    , pos(inPos)
+    , total(inTotal)
+  {
+  }
+
+  static bool perform(MetaOperation* inOp)
+  {
+    auto* p = static_cast<ReadUntilOperation*>(inOp);
+
+    if (p->m_s.ReadUntil(p->buf, p->len, p->total, p->delim, p->offset, p->pos)) {
+      SocketImpl& impl = p->m_s.GetData();
+      rel_store(impl.Ops.m_to_do, true);
+
+      epoll_event ev{};
+      ev.events = PASSIVE;
+      ev.data.ptr = static_cast<void*>(&(impl.Ops));
+
+      epoll_ctl(p->m_s.GetContext().m_reactor.GetFd(),
+                EPOLL_CTL_MOD,
+                p->m_s.GetFd(),
+                &ev);
+
+      return true;
+    }
+
+    return false;
+  }
+
+  Socket& m_s;
+
+  void*& buf;
+
+  ssize_t& len;
+
+  char const* delim;
+
+  int& offset;
+
+  void const*& pos;
+
+  ssize_t& total;
+};
+
 /**
  *
  */

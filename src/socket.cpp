@@ -119,14 +119,74 @@ Socket::Read(void*& buf, ssize_t& len, ssize_t& total)
 }
 
 bool
+Socket::ReadUntil(void*& buf,
+                  ssize_t& len,
+                  ssize_t& total,
+                  char const* delim,
+                  int& offset,
+                  void const*& pos)
+{
+  ssize_t ret = 0;
+  int off = strlen(delim);
+  string_view checker;
+  size_t position = 0;
+
+  for (;;) {
+    ret = ::read(m_fd_copy, buf, len);
+
+    if (ret == 0) {
+      UpdateState(errors::at_eof);
+      return false;
+    }
+
+    if (ret == -1) {
+      if (errno == errors::try_again) {
+        errno = 0;
+        return true;
+      } else if (errno != errors::interrupted) {
+        m_state = update_error();
+        errno = 0;
+        return false;
+      }
+    }
+
+    total += ret;
+    if (offset)
+      checker = { static_cast<char*>(buf) - off + 1,
+                  static_cast<size_t>(ret + off - 1) };
+    else
+      checker = { static_cast<char*>(buf), static_cast<size_t>(ret) };
+
+    ++offset;
+
+    position = checker.find(delim, 0, off);
+
+    if (position != string_view::npos) {
+      pos = &checker[position];
+      return false;
+    }
+
+    if (ret == len) {
+
+      if (position == string_view::npos)
+        UpdateState(errors::no_buffer_space);
+
+      return false;
+    }
+
+    buf = static_cast<char*>(buf) + ret;
+    len -= ret;
+  }
+}
+
+bool
 Socket::Write(void const*& buf, ssize_t& len, ssize_t& total)
 {
   ssize_t ret = 0;
   for (;;) {
     ret = ::send(m_fd_copy, buf, len, MSG_MORE | MSG_NOSIGNAL);
 
-    if (ret == len)
-    {
+    if (ret == len) {
       total += len;
       return false;
     }
