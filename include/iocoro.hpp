@@ -4,6 +4,7 @@
 #include "iocoro_server.hpp"
 #include "dummy.hpp"
 #include "socket_ops.hpp"
+#include "hexdump.hpp"
 
 namespace ioCoro {
 

@@ -47,7 +47,14 @@
  */
 #define ACTIVE EPOLLOUT |  EPOLLET | EPOLLERR | EPOLLHUP | EPOLLPRI
 
+
 /**
  * 
  */
 #define HOLDINGTIME -1
+
+
+/**
+ * 
+ */
+#define DUMPCOLUMN 16

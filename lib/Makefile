@@ -3,7 +3,7 @@ ifneq "$(MAKECMDGOALS)" "clean"
 endif
 
 lib         := libiocoro.a
-level-one   := socket_ops.o random.o reactor.o
+level-one   := socket_ops.o random.o reactor.o hexdump.o
 level-two   := socket.o 
 level-three := iocoro_syscall_impl.o
 level-four  := iocoro_syscall.o
