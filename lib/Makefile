@@ -1,31 +1,25 @@
-vpath %.hpp ../include
-vpath %.cpp ../src
+ifneq "$(MAKECMDGOALS)" "clean"
+	-include ./pattern.mk
+endif
 
-libiocoro.a: objects
+lib         := libiocoro.a
+level-one   := socket_ops.o random.o reactor.o
+level-two   := socket.o 
+level-three := iocoro_syscall_impl.o
+level-four  := iocoro_syscall.o
 
-objects: random.o reactor.o socket.o iocoro_syscall_impl.o iocoro_syscall.o
+# lib target...
+$(lib): $(level-four)
 
-iocoro_syscall.o: iocoro_syscall.cpp iocoro_syscall_impl.o socket.o
-
-iocoro_syscall_impl.o: iocoro_syscall_impl.cpp socket.o
-
-socket.o: socket.cpp reactor.o
-
-reactor.o: reactor.cpp
-
-random.o: random.cpp
+$(call building,$(level-one))
+$(call building,$(level-two),$(level-one))
+$(call building,$(level-three),$(level-two))
+$(call building,$(level-four),$(level-three))
 
 
-%.a: 
-	@echo ***cleaning garbages...            [done]
-	@rm -rf ./*.o	
-
-%.o: %.cpp
-	@echo cc -c -o $@
-	@g++ -pthread -fcoroutines -latomic -I ../include -Wall -std=c++20 -O3 -c -o $@ $^ 
-	@ar -r libiocoro.a $@ 2>/dev/null
-
+# clean target
 .PHONY: clean-all
 clean-all:
-	@echo ***reset source...                 [done]
-	@rm -rf ./*.o ./*.a
+	@$(SAY) ***reset source...                 [done]
+	@$(RM) ./*.o ./*.a
+
