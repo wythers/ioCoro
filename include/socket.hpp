@@ -130,7 +130,7 @@ public:
 
   void ShutdownWrite() { ::shutdown(m_fd_copy, SHUT_WR); }
 
-  Socket() = delete;
+  Socket() = default;
   Socket(Socket const&) = default;
   Socket& operator=(Socket const&) = default;
 

@@ -1,5 +1,6 @@
 #include <iocoro/iocoro.hpp>
 
+#include <iocoro/guard.hpp>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -13,6 +14,8 @@ struct test
 {
         static IoCoro<void> Passive(Socket sock)
         {
+                unique_socket cleanup(sock);
+
                 if (sock)
                 {
                         cout << sock.ErrorMessage() << endl;
@@ -48,12 +51,13 @@ struct test
                         co_return;
                 }
 
-                sock.Unhide();
                 co_return;
         }
 
         static IoCoro<void> Active(Socket sock, char const* ip, int port)
         {
+                unique_socket cleanup(sock);
+
                 co_await ioCoroConnect(sock, ip, port);
                 if (sock)
                 {
@@ -90,7 +94,6 @@ struct test
                 buf[ret.second] = '\0';
                 cout << buf << endl;
 
-                sock.Unhide();
                 co_return;
         }
 
