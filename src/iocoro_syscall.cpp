@@ -23,8 +23,7 @@ ioCoroRead::await_suspend(std::coroutine_handle<> h)
         Ios& ios = m_s.GetContext();
         SocketImpl& impl = m_s.GetData();
 
-        impl.Task =
-          Alloc<CompleteOperation<ReadOperation>>(h, m_s, buf, len, total);
+        Acquire<CompleteOperation<ReadOperation>>(h, m_s, buf, len, total);
 
         rel_store(impl.Ops.m_to_do, true);
 
@@ -68,7 +67,7 @@ ioCoroReadUntil::await_suspend(std::coroutine_handle<> h)
         Ios& ios = m_s.GetContext();
         SocketImpl& impl = m_s.GetData();
 
-        impl.Task = Alloc<CompleteOperation<ReadUntilOperation>>(
+        Acquire<CompleteOperation<ReadUntilOperation>>(
           h, m_s, buf, len, delim, offset, pos, total);
 
         rel_store(impl.Ops.m_to_do, true);
@@ -138,8 +137,7 @@ ioCoroWrite::await_suspend(std::coroutine_handle<> h)
         Ios& ios = m_s.GetContext();
         SocketImpl& impl = m_s.GetData();
 
-        impl.Task =
-          Alloc<CompleteOperation<WriteOperation>>(h, m_s, buf, len, total);
+        Acquire<CompleteOperation<WriteOperation>>(h, m_s, buf, len, total);
 
         rel_store(impl.Ops.m_to_do, true);
 
@@ -166,7 +164,7 @@ ioCoroWrite::await_suspend(std::coroutine_handle<> h)
 bool
 ioCoroConnect::await_suspend(std::coroutine_handle<> h)
 {
-  struct sockaddr_in address;
+  sockaddr_in address{};
   memset(&address, 0, sizeof(address));
   address.sin_family = AF_INET;
   inet_pton(AF_INET, ip, &address.sin_addr);
@@ -176,12 +174,12 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
 
   if (ret == -1) {
 
-    if (errno == EINPROGRESS) {
+    if (errno == errors::in_progress) {
       errno = 0;
       Ios& ios = m_s.GetContext();
       SocketImpl& impl = m_s.GetData();
 
-      impl.Task = Alloc<CompleteOperation<ConnectOperation>>(h, m_s);
+      Acquire<CompleteOperation<ConnectOperation>>(h, m_s);
 
       rel_store(impl.Ops.m_to_do, true);
 
@@ -201,11 +199,5 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
       return false;
     }
   }
-
-  SocketImpl& impl = m_s.GetData();
-
-  impl.Addr = address;
-  impl.Size = sizeof(address);
-
   return false;
 }

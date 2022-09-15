@@ -14,16 +14,18 @@ AcceptOperation::AcceptInit(Ios& ios, char const* ip, int port)
   impl->m_fd = fd;
   static_cast<Operation>(impl->Op) = { &SocketImpl::MaintainOperation::perform,
                                        nullptr };
-  impl->Addr.sin_family = AF_INET;
+                                      
+  struct sockaddr_in Addr{};
+  Addr.sin_family = AF_INET;
   if (ip) {
-    inet_pton(AF_INET, ip, &(impl->Addr.sin_addr));
+    inet_pton(AF_INET, ip, &(Addr.sin_addr));
   } else {
-    impl->Addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    Addr.sin_addr.s_addr = htonl(INADDR_ANY);
   }
-  impl->Addr.sin_port = htons(port);
+  Addr.sin_port = htons(port);
 
   int ret = 0;
-  ret = ::bind(fd, (struct sockaddr*)(&(impl->Addr)), sizeof(impl->Addr));
+  ret = ::bind(fd, (struct sockaddr*)(&(Addr)), sizeof(Addr));
   if (ret == -1)
     throw_exception("bind failed");
 
@@ -46,7 +48,7 @@ AcceptOperation::operator()()
       m_sock.GetFd(), (sockaddr*)&address, &len, SOCK_NONBLOCK | SOCK_CLOEXEC);
 
     if (fd == -1) {
-      if (errno == EAGAIN) {
+      if (errno == errors::try_again) {
         errno = 0;
         return;
       }
@@ -57,8 +59,6 @@ AcceptOperation::operator()()
     impl->m_fd = fd;
     static_cast<Operation>(impl->Ops) = { &SocketImpl::ReactOperation::perform,
                                           nullptr };
-    impl->Size = sizeof(impl->Addr);
-    impl->Addr = address;
 
     Socket tmp{ ios, *impl, Socket::Normal{} };
 

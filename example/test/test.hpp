@@ -14,7 +14,9 @@ struct test
 {
         static IoCoro<void> Passive(Socket sock)
         {
-                unique_socket cleanup(sock);
+                unique_socket cleanup(sock, []{
+                        printf("deallocate\n");
+                });
 
                 if (sock)
                 {

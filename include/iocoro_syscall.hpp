@@ -99,7 +99,8 @@ struct ioCoroReadUntil : ioCoroSyscall
 
   pair<ssize_t, size_t> await_resume()
   {
-    return { total, static_cast<char const*>(pos) - static_cast<char const*>(start) };
+    return { total,
+             static_cast<char const*>(pos) - static_cast<char const*>(start) };
   }
 
   Socket& m_s;

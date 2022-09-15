@@ -28,7 +28,7 @@ public:
     Socket s_accept = AcceptOperation::AcceptInit(*this, m_ip, m_port);
     auto& hook = s_accept.GetData();
 
-    hook.Seed = Alloc<AcceptOperation>(s_accept, &Service::Passive);
+    hook.Seed = Alloc<AcceptOperation>(&Service::Passive, s_accept);
 
     Ios::Run();
   }

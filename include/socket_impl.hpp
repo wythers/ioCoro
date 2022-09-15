@@ -2,18 +2,23 @@
 
 #include "operation.hpp"
 #include "operation_queue.hpp"
+#include "default_args.hpp"
 #include "mm_order.hpp"
 
 #include <arpa/inet.h>
 #include <atomic>
 #include <mutex>
+#include <new>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+
 using std::atomic;
 using std::mutex;
+using std::byte;
+using std::launder;
 
 namespace ioCoro {
 
@@ -25,7 +30,9 @@ struct SocketImpl
 
   struct ReactOperation : Operation
   {
-    MetaOperation* meta{};
+//    MetaOperation* meta{};
+
+    byte payload[PAYLOADSIZE];
 
     atomic<bool> m_to_do{};
 
@@ -45,10 +52,12 @@ struct SocketImpl
       if (!acq_compare_exchange_strong(p->m_to_do, flag, false))
         return;
 
-      if ((*(p->meta))())
-        return;
+      auto* meta = launder(reinterpret_cast<MetaOperation*>(p->payload));
+
+      if ((*(meta))())
+       return;
       
-      Operation* finish = static_cast<Operation*>(p->meta);
+      Operation* finish = static_cast<Operation*>(meta);
       (*finish)();
     }
 
@@ -59,7 +68,7 @@ struct SocketImpl
   } Ops{};
 
 #define Next Ops.m_next
-#define Task Ops.meta
+#define Task Ops.payload
 
   /**
    * There is an interesting thing here that em... why not a flag like
@@ -84,15 +93,6 @@ struct SocketImpl
   } Op{};
 
 #define Seed Op.seed
-
-  struct SockInfo
-  {
-    sockaddr_in addr{};
-    socklen_t size{ sizeof(addr) };
-  } m_info{};
-
-#define Addr m_info.addr
-#define Size m_info.size
 };
 
 } // namespace ioCoro

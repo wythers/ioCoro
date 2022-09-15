@@ -21,7 +21,7 @@ namespace ioCoro {
  * NullOperation iocoroSyscall is the special one, it has two functions: one is
  * to represent of a signal, the other is to as a mm fence for synchronization
  *
- * @note Iocoro && User action
+ * @ingroup Iocoro && User action
  */
 struct NullOperation : Operation
 {
@@ -41,7 +41,7 @@ struct NullOperation : Operation
  * BaseOperation iocoroSyscall, as its name, is just used for most initial cases
  * but not all
  *
- * @note Iocoro && User action
+ * @ingroup Iocoro && User action
  */
 struct BaseOperation : Operation
 {
@@ -54,7 +54,6 @@ struct BaseOperation : Operation
   static void perform(Operation* inOp)
   {
     unique_ptr<BaseOperation> p{ static_cast<BaseOperation*>(inOp) };
-
     (p->m_h)();
   }
 
@@ -82,7 +81,7 @@ struct PostOperation : Operation
 /**
  * PollOperation iocoroSyscall is specail for linux Epoll function
  *
- * @note Iocoro-Context action, be hidden
+ * @ingroup Iocoro-Context action, be hidden
  */
 struct PollOperation : Operation
 {
@@ -94,7 +93,7 @@ struct PollOperation : Operation
   {
   }
 
-  void operator()()
+  bool operator()()
   {
     epoll_event events[EPOLL_EVENT_NUM];
     int num_events = epoll_wait(m_fd, events, EPOLL_EVENT_NUM, HOLDINGTIME);
@@ -109,7 +108,7 @@ struct PollOperation : Operation
        *  poll action is closed, back to caller
        */
       if (!p)
-        return;
+        return true;
 
       ++local_num;
       auto* cluster = static_cast<Operation*>(p);
@@ -121,12 +120,15 @@ struct PollOperation : Operation
     this->next = nullptr;
     local_que.PushBack(this);
     m_tasks.Push(local_que, local_num);
+
+    return false;
   }
 
   static void perform(Operation* inOp)
   {
     auto* p = static_cast<PollOperation*>(inOp);
-    (*p)();
+    if ((*p)())
+      Dealloc(p);
   }
 
   Reactor& m_Re;
@@ -141,13 +143,13 @@ struct PollOperation : Operation
  * guys(fds) from OS-Context, then deal with the guys and at last, transmit the
  * armed guys(Sockets) to User-Context
  *
- * @note Iocoro-Context action, be hidden
+ * @ingroup Iocoro-Context action, be hidden
  */
 struct AcceptOperation : Operation
 {
   typedef IoCoro<void> (*Regular)(Socket);
 
-  AcceptOperation(Socket inSo, Regular incoro)
+  AcceptOperation(Regular incoro, Socket inSo)
     : Operation{ &perform }
     , m_sock(inSo)
     , m_regular_coro(incoro)
@@ -190,14 +192,7 @@ struct ConnectOperation : MetaOperation
 
     if (ret == -1) {
       p->m_s.UpdateState();
-      return false;
     }
-
-    SocketImpl& impl = p->m_s.GetData();
-
-    impl.Addr = address;
-    impl.Size = len;
-
     return false;
   }
 
@@ -329,7 +324,8 @@ struct ReadUntilOperation : MetaOperation
   {
     auto* p = static_cast<ReadUntilOperation*>(inOp);
 
-    if (p->m_s.ReadUntil(p->buf, p->len, p->total, p->delim, p->offset, p->pos)) {
+    if (p->m_s.ReadUntil(
+          p->buf, p->len, p->total, p->delim, p->offset, p->pos)) {
       SocketImpl& impl = p->m_s.GetData();
       rel_store(impl.Ops.m_to_do, true);
 
@@ -373,7 +369,7 @@ struct CompleteOperation : MetaOp
 
   static void perform(Operation* inOp)
   {
-    unique_ptr<CompleteOperation> p{ static_cast<CompleteOperation*>(inOp) };
+    auto* p = static_cast<CompleteOperation*>(inOp);
 
     (p->h)();
   }

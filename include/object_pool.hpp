@@ -1,5 +1,6 @@
 #pragma once
 
+#include "concepts.hpp"
 #include "default_args.hpp"
 #include "mm_order.hpp"
 #include "socket_impl.hpp"
@@ -7,11 +8,13 @@
 #include <string.h>
 #include <utility>
 
+using std::decay_t;
 using std::forward;
 
 namespace ioCoro {
 
 class ObjectPool;
+class Socket;
 
 inline SocketImpl*
 Alloc(ObjectPool&);
@@ -19,11 +22,26 @@ Alloc(ObjectPool&);
 inline void
 Dealloc(ObjectPool&, SocketImpl*);
 
-template<typename T, typename... Args>
+template<typename T, IsCoroHandler H, IsSocketType S, typename... Last>
 inline constexpr auto*
-Alloc(Args&&... args)
+Acquire(H&& h, S&& s, Last&&... last)
 {
-  return new T{ forward<Args>(args)... };
+  return new (s.GetData().Ops.payload)
+    T{ forward<H>(h), forward<S>(s), forward<Last>(last)... };
+}
+
+template<typename T, typename... Last>
+inline constexpr auto*
+Alloc(Last&&... last)
+{
+  return new T{ forward<Last>(last)... };
+}
+
+template<typename T>
+inline constexpr auto*
+Alloc()
+{
+  return new T{};
 }
 
 template<typename T>

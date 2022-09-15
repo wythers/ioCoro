@@ -64,7 +64,7 @@ Socket::Socket(Ios& ios, SocketImpl& impl, Special)
   int ret = 0;
   ret = epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, m_fd_copy, &ev);
   if (ret < 0)
-    m_state = update_error();
+    throw_exception("accept socket failed");
 
   Hide();
   m_ios->m_sock_num.fetch_add(1, rx);
