@@ -28,9 +28,8 @@ public:
   void join()
   {
     rx_store(m_join, true);
-    do {
-      m_join.wait(false, rx);
-    } while (rx_load(m_sock_num) != 0);
+
+    m_join.wait(true, rx);
 
     Ios::Stop();
   }

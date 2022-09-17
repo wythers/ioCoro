@@ -80,7 +80,10 @@ Socket::~Socket()
     ::close(fd);
 
     if (m_ios->m_sock_num.fetch_sub(1, rx) == 1 && m_ios->m_join.load(rx))
+    {
+      rx_store(m_ios->m_join, false);
       m_ios->m_join.notify_one();
+    }
   }
 }
 
