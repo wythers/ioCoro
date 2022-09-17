@@ -133,8 +133,7 @@ private:
 
   priority_queue<Holder<Operation>,
                  vector<Holder<Operation>>,
-                 Holder<Operation>::Compare>
-    m_timers{};
+                 Holder<Operation>::Compare>  m_timers{};
 };
 
 using Timers_t = Timer_queue;

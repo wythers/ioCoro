@@ -28,7 +28,7 @@ public:
 
   Timer(Socket& refS, F&& f)
     : m_timer_holders(refS.GetContext().m_timer_holders)
-		, m_task_pool(refS.GetContext().m_tasks)
+    , m_task_pool(refS.GetContext().m_tasks)
     , m_done{ false }
   {
     m_task = Alloc<TimerOperation<decay_t<F>>>(forward<F>(f), m_done);
@@ -37,34 +37,32 @@ public:
   ~Timer() { m_done.wait(false, rx); }
 
 public:
-	template<typename Rep, typename Period>
-	void After(std::chrono::duration<Rep, Period> const& elapse)
-	{
-		if (elapse <= elapse.zero())
-		{
-			m_task_pool.Push(m_task);
-			return;
-		}
+  template<typename Rep, typename Period>
+  void After(std::chrono::duration<Rep, Period> const& elapse)
+  {
+    if (elapse <= elapse.zero()) {
+      m_task_pool.Push(m_task);
+      return;
+    }
 
-		auto transfer = std::chrono::duration_cast<microseconds>(elapse);
-		m_timer_holders.Push(m_task, transfer);
-	}
+    auto transfer = std::chrono::duration_cast<microseconds>(elapse);
+    m_timer_holders.Push(m_task, transfer);
+  }
 
-	void At(TimePoint const& tp)
-	{
-		if (tp <= std::chrono::system_clock::now())
-		{
-			m_task_pool.Push(m_task);
-			return;
-		}
+  void At(TimePoint const& tp)
+  {
+    if (tp <= std::chrono::system_clock::now()) {
+      m_task_pool.Push(m_task);
+      return;
+    }
 
-		m_timer_holders.Push(m_task, tp);
-	}
+    m_timer_holders.Push(m_task, tp);
+  }
 
 private:
   Timers_t& m_timer_holders;
 
-	TaskPool& m_task_pool;
+  TaskPool& m_task_pool;
 
   Operation* m_task;
 
@@ -75,8 +73,8 @@ template<typename F>
 struct TimerOperation : Operation
 {
   TimerOperation(F&& f, atomic<bool>& flag)
-    : Operation{&perform}
-		, task(forward<F>(f))
+    : Operation{ &perform }
+    , task(forward<F>(f))
     , is_done(flag)
   {
   }
