@@ -8,7 +8,7 @@ template<typename Service>
 class Client : public SeviceModelBase
 {
 public:
-  Client() { m_tasks.Push(Alloc<PollOperation>(m_reactor, m_tasks)); }
+  Client() { m_tasks.Push(Alloc<PollOperation>(m_reactor, m_tasks, m_timer_holders)); }
 
   template<typename... Args>
   void Submit(Args&&... args)
@@ -28,7 +28,7 @@ public:
   void join()
   {
     rx_store(m_join, true);
-
+    
     m_join.wait(true, rx);
 
     Ios::Stop();

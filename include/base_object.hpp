@@ -7,26 +7,26 @@
 #include "object_pool.hpp"
 #include "operation.hpp"
 #include "reactor.hpp"
+#include "dummy.hpp"
 #include "thread_pool.hpp"
+#include "timer_queue.hpp"
 
 namespace ioCoro {
 
 class SeviceModelBase
 {
-  friend class Socket;
+  Register_System_Interactive_Unit Socket;
+  Register_System_Interactive_MultiUnit Timer;
 
-  friend struct AcceptOperation;
-  friend struct ReadOperation;
-  friend struct ReadUntilOperation;
-  friend struct WriteOperation;
+  Register_System_Buildin_Call AcceptOperation;
+  Register_System_Buildin_Call ReadOperation;
+  Register_System_Buildin_Call ReadUntilOperation;
+  Register_System_Buildin_Call WriteOperation;
 
-  friend struct ioCoroRead;
-  friend struct ioCoroReadUntil;
-  friend struct ioCoroWrite;
-  friend struct ioCoroConnect;
-
-  using Socknum_t = atomic<ulong>;
-  using Joinable_t = atomic<bool>;
+  Register_System_Call ioCoroRead;
+  Register_System_Call ioCoroReadUntil;
+  Register_System_Call ioCoroWrite;
+  Register_System_Call ioCoroConnect;
 
 public:
   void Run() { m_tasks.Start(); }
@@ -45,6 +45,8 @@ public:
 
 protected:
   ObjectPool m_objects{};
+
+  Timers_t m_timer_holders{};
 
   Socknum_t m_sock_num{};
 

@@ -15,6 +15,9 @@ using std::error_code;
 using std::mutex;
 using std::system_error;
 
+using Socknum_t = atomic<ulong>;
+using Joinable_t = atomic<bool>;
+
 namespace ioCoro {
 
 class Reactor

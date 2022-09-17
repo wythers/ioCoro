@@ -85,10 +85,11 @@ struct PostOperation : Operation
  */
 struct PollOperation : Operation
 {
-  PollOperation(Reactor& inRe, TaskPool& inPool)
+  PollOperation(Reactor& inRe, TaskPool& inPool, Timers_t& inTimers)
     : Operation{ &perform }
     , m_Re{ inRe }
     , m_tasks{ inPool }
+    , m_timers{inTimers}
     , m_fd{ m_Re.GetFd() }
   {
   }
@@ -99,7 +100,7 @@ struct PollOperation : Operation
     int num_events = epoll_wait(m_fd, events, EPOLL_EVENT_NUM, HOLDINGTIME);
 
     Op_queue<Operation> local_que{};
-    int local_num = 1;
+    int local_num = 0;
 
     for (int i = 0; i < num_events; ++i) {
       void* p = events[i].data.ptr;
@@ -117,9 +118,21 @@ struct PollOperation : Operation
       local_que.PushBack(cluster);
     }
 
+    if (local_num != 0)
+      m_tasks.Push(local_que, local_num);
+
+    auto [que, n] = m_timers.Batch();
     this->next = nullptr;
-    local_que.PushBack(this);
-    m_tasks.Push(local_que, local_num);
+    que.PushBack(this);
+    ++n;
+    
+    /**
+     * too few tasks to process, so waiting for a time slice
+     */
+    if (local_num == 0 && n == 1)
+      std::this_thread::yield();
+    
+    m_tasks.Push(que, n);
 
     return false;
   }
@@ -134,6 +147,8 @@ struct PollOperation : Operation
   Reactor& m_Re;
 
   TaskPool& m_tasks;
+
+  Timers_t& m_timers;
 
   int m_fd;
 };

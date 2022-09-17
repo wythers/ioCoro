@@ -60,7 +60,7 @@
  * 
  */
 #ifndef HOLDINGTIME
-#define HOLDINGTIME -1
+#define HOLDINGTIME 0
 #endif
 
 
@@ -76,3 +76,5 @@
 #ifndef PAYLOADSIZE
 #define PAYLOADSIZE 88
 #endif
+
+

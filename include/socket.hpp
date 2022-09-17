@@ -84,7 +84,7 @@ public:
    * @code
    *      co_await ioCoroRead(...);
    *      or
-   *      callIoCoroRead(...);
+   *      call ioCoroRead(...);
    *
    * @note Why use Bool-returnValue??? because we need hook coroutine local
    * varaible to let Iocoro-context pass some sensitive value, emm.. sounds like
