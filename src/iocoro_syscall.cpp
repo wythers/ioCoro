@@ -165,7 +165,6 @@ bool
 ioCoroConnect::await_suspend(std::coroutine_handle<> h)
 {
   sockaddr_in address{};
-  memset(&address, 0, sizeof(address));
   address.sin_family = AF_INET;
   inet_pton(AF_INET, ip, &address.sin_addr);
   address.sin_port = htons(port);

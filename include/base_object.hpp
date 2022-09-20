@@ -44,11 +44,11 @@ public:
   void StopReactor() { m_reactor.Shutdown(); }
 
 protected:
+  Socknum_t m_sock_num{};
+
   ObjectPool m_objects{};
 
   Timers_t m_timer_holders{};
-
-  Socknum_t m_sock_num{};
 
   Joinable_t m_join{};
 
