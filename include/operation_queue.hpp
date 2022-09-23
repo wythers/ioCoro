@@ -1,10 +1,19 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
+
+#include "concepts.hpp"
 
 #include <iterator>
 
 namespace ioCoro {
 
-template<typename Op>
+template<IsOperationType Op>
 class Op_queue
 {
 public:
@@ -25,6 +34,9 @@ public:
   template<typename OtherOperation>
   void PushBack(Op_queue<OtherOperation>& inOther)
   {
+    if (inOther.IsEmpty())
+      return;
+
     Op* inFront = static_cast<Op*>(inOther.Front());
     Op* inBack = static_cast<Op*>(inOther.Back());
 

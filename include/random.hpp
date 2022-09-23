@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ */
+
 #pragma once
 
 #include <random>

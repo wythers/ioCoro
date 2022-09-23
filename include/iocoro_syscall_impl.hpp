@@ -1,6 +1,10 @@
 /**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
  *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
  */
+
 #pragma once
 
 #include "base_object.hpp"
@@ -8,6 +12,7 @@
 #include "default_args.hpp"
 #include "reactor.hpp"
 #include "socket.hpp"
+#include "concepts.hpp"
 
 #include <memory>
 
@@ -18,10 +23,13 @@ using std::unique_ptr;
 namespace ioCoro {
 
 /**
- * NullOperation iocoroSyscall is the special one, it has two functions: one is
- * to represent of a signal, the other is to as a mm fence for synchronization
+ * @brief NullOperation buildin-iocoroSyscall is the special one, it has two
+ * functions: one is to represent of a signal, the other is to as a mm fence for
+ * synchronization
  *
- * @ingroup Iocoro && User action
+ * @ingroup iocoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
  */
 struct NullOperation : Operation
 {
@@ -38,14 +46,16 @@ struct NullOperation : Operation
 };
 
 /**
- * BaseOperation iocoroSyscall, as its name, is just used for most initial cases
- * but not all
+ * @brief BaseOperation builin-iocoroSyscall, as its name, is just used for
+ * most initial cases but not all
  *
- * @ingroup Iocoro && User action
+ * @ingroup ioCoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
  */
 struct BaseOperation : Operation
 {
-  BaseOperation(coroutine_handle<> inH)
+  BaseOperation(coroutine_handle<> inH, Socket&)
     : Operation{ &perform }
     , m_h(inH)
   {
@@ -53,48 +63,82 @@ struct BaseOperation : Operation
 
   static void perform(Operation* inOp)
   {
-    unique_ptr<BaseOperation> p{ static_cast<BaseOperation*>(inOp) };
+    auto* p = static_cast<BaseOperation*>(inOp);
     (p->m_h)();
   }
 
   std::coroutine_handle<> m_h;
 };
 
-template<typename T>
+/**
+ * @brief for the client end, post a task unrelated to the socket to
+ * ioCoro-context
+ *
+ * @ingroup ioCoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
+ */
+template<CanBeInvoked T>
 struct PostOperation : Operation
 {
-  PostOperation(T&& f)
+  PostOperation(T&& f, TaskPool& inPool, atomic<bool>& inJoin)
     : Operation(&perform)
     , func(std::forward<T>(f))
+    , tasks(inPool)
+    , m_joinable(inJoin)
   {
+    tasks.m_numm.fetch_add(1, rx);
   }
 
-  static void perform(Operation* inOp)
-  {
-    unique_ptr<PostOperation> p{ static_cast<PostOperation*>(inOp) };
-    (p->func)();
-  }
+  static void perform(Operation* inOp);
 
   T func;
+  TaskPool& tasks;
+  atomic<bool>& m_joinable;
 };
 
+template<CanBeInvoked T>
+void
+PostOperation<T>::perform(Operation* inOp)
+{
+  unique_ptr<PostOperation> p{ static_cast<PostOperation*>(inOp) };
+  (p->func)();
+
+  if (p->tasks.m_numm.fetch_sub(1, rx) == 1) {
+    rx_store(p->tasks.stoped, true);
+    p->tasks.stoped.notify_one();
+  }
+}
+
 /**
- * PollOperation iocoroSyscall is specail for linux Epoll function
+ * @brief PollOperation buildin-iocoroSyscall is specail for linux Epoll
+ * function and timer
  *
  * @ingroup Iocoro-Context action, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
  */
 struct PollOperation : Operation
 {
-  PollOperation(Reactor& inRe, TaskPool& inPool, Timers_t& inTimers)
+  PollOperation(Reactor& inRe,
+                TaskPool& inPool,
+                Timers_t& inTimers,
+                atomic<uint>& inNum)
     : Operation{ &perform }
     , m_Re{ inRe }
     , m_tasks{ inPool }
-    , m_timers{inTimers}
+    , m_timers{ inTimers }
+    , m_numm{ inNum }
     , m_fd{ m_Re.GetFd() }
   {
+    m_numm.fetch_add(1, rx);
   }
 
-  bool operator()()
+  /**
+   * POLL operation implement is at the header file, because once we need Timer,
+   * the libiocoro dont need rebuilding again
+   */
+  [[gnu::noinline]] bool operator()()
   {
     epoll_event events[EPOLL_EVENT_NUM];
     int num_events = epoll_wait(m_fd, events, EPOLL_EVENT_NUM, HOLDINGTIME);
@@ -118,31 +162,35 @@ struct PollOperation : Operation
       local_que.PushBack(cluster);
     }
 
+#ifdef NEED_IOCORO_TIMER
     if (local_num != 0)
       m_tasks.Push(local_que, local_num);
 
-    auto [que, n] = m_timers.Batch();
+    Op_queue<Operation> local_timer{};
     this->next = nullptr;
-    que.PushBack(this);
+    local_timer.PushBack(this);
+    auto [que, n] = m_timers.Batch();
     ++n;
-    
+    local_timer.PushBack(que);
+
     /**
-     * too few tasks to process, so waiting for a time slice
+     * too few tasks to process, so waiting for some time slice
      */
     if (local_num == 0 && n == 1)
       std::this_thread::yield();
-    
-    m_tasks.Push(que, n);
+
+    m_tasks.Push(local_timer, n);
+#else
+    this->next = nullptr;
+    local_que.PushBack(this);
+    ++local_num;
+    m_tasks.Push(local_que, local_num);
+#endif
 
     return false;
   }
 
-  static void perform(Operation* inOp)
-  {
-    auto* p = static_cast<PollOperation*>(inOp);
-    if ((*p)())
-      Dealloc(p);
-  }
+  static void perform(Operation* inOp);
 
   Reactor& m_Re;
 
@@ -150,15 +198,20 @@ struct PollOperation : Operation
 
   Timers_t& m_timers;
 
+  atomic<uint>& m_numm;
+
   int m_fd;
 };
 
 /**
- * For the server end, AcceptOperation iocoroSyscall is used only to accept new
- * guys(fds) from OS-Context, then deal with the guys and at last, transmit the
- * armed guys(Sockets) to User-Context
+ * @brief For the server end, AcceptOperation iocoroSyscall is used only to
+ * accept new guys(fds) from OS-Context, then deal with the guys and at last,
+ * transmit the armed guys(Sockets) to User-Context
  *
  * @ingroup Iocoro-Context action, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
+ *
  */
 struct AcceptOperation : Operation
 {
@@ -187,7 +240,11 @@ struct AcceptOperation : Operation
 };
 
 /**
+ * @brief as the name description
  *
+ * @ingroup ioCoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
  */
 struct ConnectOperation : MetaOperation
 {
@@ -197,25 +254,17 @@ struct ConnectOperation : MetaOperation
   {
   }
 
-  static bool perform(MetaOperation* inOp)
-  {
-    auto* p = static_cast<ConnectOperation*>(inOp);
-    sockaddr_in address{};
-    socklen_t len = sizeof(address);
-    int ret = 0;
-    ret = getpeername(p->m_s.GetFd(), (struct sockaddr*)(&address), &len);
-
-    if (ret == -1) {
-      p->m_s.UpdateState();
-    }
-    return false;
-  }
+  static bool perform(MetaOperation* inOp);
 
   Socket& m_s;
 };
 
 /**
+ * @brief as the name description
  *
+ * @ingroup ioCoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
  */
 struct ReadOperation : MetaOperation
 {
@@ -232,28 +281,7 @@ struct ReadOperation : MetaOperation
   {
   }
 
-  static bool perform(MetaOperation* inOp)
-  {
-    auto* p = static_cast<ReadOperation*>(inOp);
-
-    if (p->m_s.Read(p->buf, p->len, p->total)) {
-      SocketImpl& impl = p->m_s.GetData();
-      rel_store(impl.Ops.m_to_do, true);
-
-      epoll_event ev{};
-      ev.events = PASSIVE;
-      ev.data.ptr = static_cast<void*>(&(impl.Ops));
-
-      epoll_ctl(p->m_s.GetContext().m_reactor.GetFd(),
-                EPOLL_CTL_MOD,
-                p->m_s.GetFd(),
-                &ev);
-
-      return true;
-    }
-
-    return false;
-  }
+  static bool perform(MetaOperation* inOp);
 
   Socket& m_s;
 
@@ -265,7 +293,11 @@ struct ReadOperation : MetaOperation
 };
 
 /**
+ * @brief as the name description
  *
+ * @ingroup ioCoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
  */
 struct WriteOperation : MetaOperation
 {
@@ -282,28 +314,7 @@ struct WriteOperation : MetaOperation
   {
   }
 
-  static bool perform(MetaOperation* inOp)
-  {
-    auto* p = static_cast<WriteOperation*>(inOp);
-
-    if (p->m_s.Write(p->buf, p->len, p->total)) {
-      SocketImpl& impl = p->m_s.GetData();
-      rel_store(impl.Ops.m_to_do, true);
-
-      epoll_event ev{};
-      ev.events = ACTIVE;
-      ev.data.ptr = static_cast<void*>(&(impl.Ops));
-
-      epoll_ctl(p->m_s.GetContext().m_reactor.GetFd(),
-                EPOLL_CTL_MOD,
-                p->m_s.GetFd(),
-                &ev);
-
-      return true;
-    }
-
-    return false;
-  }
+  static bool perform(MetaOperation* inOp);
 
   Socket& m_s;
 
@@ -314,6 +325,13 @@ struct WriteOperation : MetaOperation
   ssize_t& total;
 };
 
+/**
+ * @brief as the name description
+ *
+ * @ingroup ioCoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
+ */
 struct ReadUntilOperation : MetaOperation
 {
   ReadUntilOperation(Func_type inF,
@@ -335,29 +353,7 @@ struct ReadUntilOperation : MetaOperation
   {
   }
 
-  static bool perform(MetaOperation* inOp)
-  {
-    auto* p = static_cast<ReadUntilOperation*>(inOp);
-
-    if (p->m_s.ReadUntil(
-          p->buf, p->len, p->total, p->delim, p->offset, p->pos)) {
-      SocketImpl& impl = p->m_s.GetData();
-      rel_store(impl.Ops.m_to_do, true);
-
-      epoll_event ev{};
-      ev.events = PASSIVE;
-      ev.data.ptr = static_cast<void*>(&(impl.Ops));
-
-      epoll_ctl(p->m_s.GetContext().m_reactor.GetFd(),
-                EPOLL_CTL_MOD,
-                p->m_s.GetFd(),
-                &ev);
-
-      return true;
-    }
-
-    return false;
-  }
+  static bool perform(MetaOperation* inOp);
 
   Socket& m_s;
 
@@ -375,7 +371,11 @@ struct ReadUntilOperation : MetaOperation
 };
 
 /**
+ * @brief as the name description
  *
+ * @ingroup ioCoro-context, be hidden
+ *
+ * @note a buildin operation, should not be direct call from user
  */
 template<typename MetaOp>
 struct CompleteOperation : MetaOp

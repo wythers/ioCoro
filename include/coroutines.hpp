@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
 #include <coroutine>
@@ -8,7 +15,7 @@ namespace ioCoro {
 
 namespace CoroDetails {
 
-template<typename T>
+template<typename T = void>
 struct IoCoro
 {
   struct promise
@@ -16,13 +23,7 @@ struct IoCoro
 
     std::suspend_always initial_suspend() const noexcept { return {}; }
     std::suspend_never final_suspend() const noexcept { return {}; }
-    void unhandled_exception() { printf("coro boom\n"); }
-
-    std::suspend_never yield_value(T* inOs)
-    {
-      //    io_context = inOs;
-      return {};
-    }
+    void unhandled_exception() {}
 
     IoCoro get_return_object()
     {

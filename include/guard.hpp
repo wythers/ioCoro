@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ */
+
 #pragma once
 
 #include "socket.hpp"
@@ -9,7 +13,7 @@ struct _empty_call
   constexpr void operator()() noexcept {}
 };
 
-template<typename F = _empty_call>
+template<CanBeInvoked F = _empty_call>
 struct unique_socket
 {
   unique_socket() = delete;

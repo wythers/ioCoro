@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
 #include <errno.h>
@@ -46,6 +53,23 @@ operator==(int err, error_code& ec)
 {
   return ec == err;
 }
+
+/**
+ * Although forbid triggering signal PIPE, we must leave an error to reflect
+ * what happened
+ */
+class SDstate : public std::error_category
+{
+public:
+  std::string message(int) const override
+  {
+    return "The socket has been closed";
+  }
+
+  char const* name() const noexcept override { return "socket_closed"; }
+
+  virtual ~SDstate() {}
+};
 
 using SocketState = error_code;
 
@@ -118,6 +142,8 @@ enum
   try_again = EAGAIN,
 
   would_block = EWOULDBLOCK,
+
+  socket_closed = EPIPE,
 
   at_eof = EOF
 };

@@ -62,6 +62,107 @@ AcceptOperation::operator()()
 
     Socket tmp{ ios, *impl, Socket::Normal{} };
 
-    ios.m_tasks.Push(Alloc<BaseOperation>(m_regular_coro(tmp)));
+    ios.m_tasks.Push(Acquire<BaseOperation>(m_regular_coro(tmp), tmp));
   }
+}
+
+void
+PollOperation::perform(Operation* inOp)
+{
+  auto* p = static_cast<PollOperation*>(inOp);
+  if ((*p)()) {
+    if (p->m_numm.fetch_sub(1, rx) == 1) {
+      rx_store(p->m_tasks.stoped, true);
+      p->m_tasks.stoped.notify_one();
+    }
+
+    Dealloc(p);
+  }
+}
+
+bool
+ConnectOperation::perform(MetaOperation* inOp)
+{
+  auto* p = static_cast<ConnectOperation*>(inOp);
+  sockaddr_in address{};
+  socklen_t len = sizeof(address);
+  int ret = 0;
+  ret = getpeername(p->m_s.GetFd(), (struct sockaddr*)(&address), &len);
+
+  if (ret == -1) {
+    p->m_s.UpdateState();
+  }
+  return false;
+}
+
+bool
+ReadOperation::perform(MetaOperation* inOp)
+{
+  auto* p = static_cast<ReadOperation*>(inOp);
+
+  if (p->m_s.Read(p->buf, p->len, p->total)) {
+    SocketImpl& impl = p->m_s.GetData();
+    rel_store(impl.Ops.m_to_do, true);
+
+    epoll_event ev{};
+    ev.events = PASSIVE;
+    ev.data.ptr = static_cast<void*>(&(impl.Ops));
+
+    epoll_ctl(p->m_s.GetContext().m_reactor.GetFd(),
+              EPOLL_CTL_MOD,
+              p->m_s.GetFd(),
+              &ev);
+
+    return true;
+  }
+
+  return false;
+}
+
+bool
+WriteOperation::perform(MetaOperation* inOp)
+{
+  auto* p = static_cast<WriteOperation*>(inOp);
+
+  if (p->m_s.Write(p->buf, p->len, p->total)) {
+    SocketImpl& impl = p->m_s.GetData();
+    rel_store(impl.Ops.m_to_do, true);
+
+    epoll_event ev{};
+    ev.events = ACTIVE;
+    ev.data.ptr = static_cast<void*>(&(impl.Ops));
+
+    epoll_ctl(p->m_s.GetContext().m_reactor.GetFd(),
+              EPOLL_CTL_MOD,
+              p->m_s.GetFd(),
+              &ev);
+
+    return true;
+  }
+
+  return false;
+}
+
+bool
+ReadUntilOperation::perform(MetaOperation* inOp)
+{
+  auto* p = static_cast<ReadUntilOperation*>(inOp);
+
+  if (p->m_s.ReadUntil(p->buf, p->len, p->total, p->delim, p->offset, p->pos)) {
+    SocketImpl& impl = p->m_s.GetData();
+    rel_store(impl.Ops.m_to_do, true);
+
+    epoll_event ev{};
+    ev.events = PASSIVE;
+    ev.data.ptr = static_cast<void*>(&(impl.Ops));
+
+    epoll_ctl(p->m_s.GetContext().m_reactor.GetFd(),
+              EPOLL_CTL_MOD,
+              p->m_s.GetFd(),
+              &ev);
+
+    return true;
+  }
+
+  return false;
 }

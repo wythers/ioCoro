@@ -1,5 +1,13 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
+// #include "concepts.hpp"
 #include "operation.hpp"
 #include "operation_queue.hpp"
 
@@ -22,7 +30,10 @@ using TimePoint = time_point<std::chrono::system_clock>;
 
 namespace ioCoro {
 
-template<typename T>
+/**
+ * the std::pair cannot meet the demand, recode the utility.
+ */
+template<IsOperationType T>
 struct Holder
 {
   TimePoint m_point;
@@ -94,16 +105,11 @@ public:
     lock_guard<mutex> locked{ m_mtx };
     m_timers.emplace(tp, op);
   }
-  /*
-    void top()
-    {
-      auto const& [p, _] = m_timers.top();
-      std::time_t ts = std::chrono::system_clock::to_time_t(p);
 
-      cout << std::put_time(std::localtime(&ts), "%F %T.\n") << std::flush;
-    }
-  */
-
+  /**
+   * the Batch function is theoretically only one copy kept in memory(or cache??), 
+   * so default inline is a better way
+   */
   std::pair<Op_queue<Operation>, int> Batch()
   {
     Op_queue<Operation> expired{};
@@ -133,7 +139,8 @@ private:
 
   priority_queue<Holder<Operation>,
                  vector<Holder<Operation>>,
-                 Holder<Operation>::Compare>  m_timers{};
+                 Holder<Operation>::Compare>
+    m_timers{};
 };
 
 using Timers_t = Timer_queue;

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
 namespace ioCoro {

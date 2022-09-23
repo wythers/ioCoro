@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
 #include "default_args.hpp"
@@ -25,15 +32,13 @@ class Reactor
 public:
   Reactor();
 
+  ~Reactor() { ::close(m_epoll_fd); }
+
   void Shutdown()
   {
     uint64_t counter(1UL);
     ::write(m_interrupter, &counter, sizeof(uint64_t));
-
-    m_shutdown = true;
   }
-
-  bool IsClosed() { return m_shutdown; }
 
   int GetFd() { return m_epoll_fd; }
 
@@ -41,8 +46,6 @@ private:
   int m_epoll_fd{};
 
   int m_interrupter{};
-
-  atomic<bool> m_shutdown{ false };
 };
 
 } // namespace ioCoro

@@ -1,7 +1,13 @@
 /**
  * Sometimes we need to transfer more straight messages to the user in a more
- * readable way, so dummy.hpp created.
+ * readable way, or to hide some gory details, so dummy.hpp created.
+ * 
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
  */
+
 #pragma once
 
 /**

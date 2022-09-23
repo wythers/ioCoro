@@ -1,12 +1,19 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
-#include "concepts.hpp"
 #include "default_args.hpp"
 #include "mm_order.hpp"
 #include "socket_impl.hpp"
 
 #include <string.h>
 #include <utility>
+#include <memory>
 
 using std::decay_t;
 using std::forward;
@@ -26,7 +33,7 @@ template<typename T, IsCoroHandler H, IsSocketType S, typename... Last>
 inline constexpr auto*
 Acquire(H&& h, S&& s, Last&&... last)
 {
-  return new (s.GetData().Ops.payload)
+  return new (s.GetData().Task)
     T{ forward<H>(h), forward<S>(s), forward<Last>(last)... };
 }
 
@@ -35,13 +42,6 @@ inline constexpr auto*
 Alloc(Last&&... last)
 {
   return new T{ forward<Last>(last)... };
-}
-
-template<typename T>
-inline constexpr auto*
-Alloc()
-{
-  return new T{};
 }
 
 template<typename T>
@@ -58,8 +58,9 @@ public:
   {
     SocketImpl* p = rx_load(m_pool);
     {
-      if (!p)
-        return Alloc<SocketImpl>();
+      if (!p) {
+        return new SocketImpl{};
+      }
     }
     while (!acq_compare_exchange_weak(m_pool, p, p->Next))
       ;
@@ -79,9 +80,26 @@ public:
       ;
   }
 
+  void reserver(int num)
+  {
+    auto* chunk = new SocketImpl[num]{};
+
+    for (int i = 0; i < num - 1; ++i) {
+      chunk[i].Next = chunk + i + 1;
+    }
+
+    m_pool = chunk;
+  }
+
+  ~ObjectPool()
+  {
+    while (std::unique_ptr<SocketImpl> tmp{m_pool.load()})
+      m_pool = tmp->Next;
+  }
+
   bool IsEmpty() { return rx_load(m_pool) == nullptr; }
 
-  atomic<SocketImpl*> m_pool{ nullptr };
+  atomic<SocketImpl*> m_pool{};
 };
 
 inline SocketImpl*

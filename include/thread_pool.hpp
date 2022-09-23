@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
 #include "default_args.hpp"
@@ -100,11 +107,6 @@ public:
     m_condi.notify_all();
   }
 
-  inline void Stop()
-  {
-    StateChange(stoped, true);
-  }
-
   inline void Start()
   {
     StateChange(started, true);
@@ -120,11 +122,20 @@ public:
     return rx_load(stoped);
   }
 
+  inline void NotifyAll()
+  {
+    m_condi.notify_all();
+  }
+
   ~TaskPool()
   {
     for (auto& t : m_threads)
       t.join();
   }
+
+public:
+  atomic<bool> stoped{};
+  atomic<uint> m_numm{};
 
 private:
   /**
@@ -139,15 +150,12 @@ private:
 #define m_mutex m_packed.m
 #define m_ops m_packed.ops
 
-  uint32_t numm{};
-
-  atomic<bool> stoped{};
-
   atomic<bool> started{};
 
   condition_variable m_condi{};
 
   vector<thread> m_threads{};
+
 };
 
 } // namespace ioCoro

@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
 #include "operation.hpp"
@@ -22,16 +29,19 @@ using std::launder;
 
 namespace ioCoro {
 
+/**
+ * the Socket Meta-data Holder
+ */
 struct SocketImpl
 {
   atomic<bool> m_hided{};
+
+  atomic<bool> m_closed{};
 
   int m_fd{};
 
   struct ReactOperation : Operation
   {
-//    MetaOperation* meta{};
-
     byte payload[PAYLOADSIZE];
 
     atomic<bool> m_to_do{};

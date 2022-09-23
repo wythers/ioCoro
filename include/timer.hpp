@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ *
+ * @file This is an internal header file, included by some ioCoro headers.
+ * do not attempt to use it directly.
+ */
+
 #pragma once
 
 #include "socket.hpp"
@@ -7,6 +14,10 @@
 
 using std::unique_ptr;
 using std::chrono::microseconds;
+
+/**
+ *  the order is {day, hour, minute, second, millisecond, and microsecond}
+ */
 using std::chrono_literals::operator""d;
 using std::chrono_literals::operator""h;
 using std::chrono_literals::operator""min;
@@ -19,7 +30,7 @@ namespace ioCoro {
 template<typename>
 struct TimerOperation;
 
-template<typename F>
+template<CanBeInvoked F>
 class Timer
 {
 public:

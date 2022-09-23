@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2022- Wyther Yang (https://github.com/wythers/iocoro)
+ */
+
 #pragma once
 
 /**
@@ -60,7 +64,11 @@
  * 
  */
 #ifndef HOLDINGTIME
+#ifdef NEED_IOCORO_TIMER
 #define HOLDINGTIME 0
+#else
+#define HOLDINGTIME -1
+#endif
 #endif
 
 
