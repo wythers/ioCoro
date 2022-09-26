@@ -1,6 +1,6 @@
 ![This is an image](./images/hello-ioCoro.png)  
   
-  # iocoro: be elegant, be efficient.  
+# iocoro: be elegant, be efficient.  
 
 iocoro is a IO library implemented with cpp20 [coroutine framework](https://www.scs.stanford.edu/~dm/blog/c++-coroutines.pdf).  
 
