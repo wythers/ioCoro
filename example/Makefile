@@ -1,6 +1,6 @@
 -include ./pattern.mk
 
-MODS := echo
+MODS := echo http
 
 
 

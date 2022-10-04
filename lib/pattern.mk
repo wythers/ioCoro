@@ -34,6 +34,6 @@ endef
 %.o: %.cpp
 	@$(SAY) cc -c -o $@
 	$(fexist)
-	@$(CC) -pthread -fcoroutines -latomic -I ../include -Wall -std=c++20 -O3 -c -o $@ $< $(lib) 
+	@$(CC) -pthread -fcoroutines -latomic -I ../include -Wall -std=c++20 -O3 -c -o $@ $< $(lib) 2>/dev/null
 	@$(AR) -r $(lib) $@ 2>/dev/null
 
