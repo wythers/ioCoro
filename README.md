@@ -2,7 +2,7 @@
 
 ---  
  
-# iocoro - be elegant, be efficient :stuck_out_tongue_winking_eye:  
+# ioCoro - be elegant, be efficient :stuck_out_tongue_winking_eye:  
 
 **ioCoro is an async-IO service framework based on cpp20Coroutine [cpp20Coroutine](https://www.scs.stanford.edu/~dm/blog/c++-coroutines.pdf).**  
 
