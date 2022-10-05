@@ -15,6 +15,11 @@ using std::string_view;
 
 namespace ioCoro {
 
+/**
+ * @note the @class Stream, an alias of @class Socket, and @class Socket types are conceptually
+ * different in both the first is used in User-context, the second
+ * ioCoro-context.
+ */
 class Socket
 {
 public:
@@ -137,14 +142,14 @@ public:
    * @code
    *      if (stream)
    *      {
-   *        if (stream.StateCode() = errors::socke_closed)
+   *        if (stream.StateCode() = errors::socket_closed)
    *        {
    *           ...
    *        }
    *      }
    *
    * @note it needs to be pointed out here that in principle, after each ioCoro
-   * system call, the socket status needs to be checked immediately. in
+   * system call, the socket(stream) status needs to be checked immediately. in
    * addition, each user-defined close checkpoint has the same need.
    */
 public:
