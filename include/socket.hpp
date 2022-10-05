@@ -106,11 +106,18 @@ public:
    *
    * @note A direct call is not recommended, A better way is like
    * @code:
-   *        unique_socket cleanup(sock);
+   *        unique_stream cleanup(stream);
    *        or
-   *        unique_socket cleanup(sock, []{
+   *        unique_stream cleanup([]{
    *             ...;
-   *        });
+   *        }, stream);
+   *
+   * @note by the way, why does name the destructor Unhide, emm... the story is
+   * that one of the ioCoro design ideas is every socket(stream) should be
+   * distributed from ioCoro-context, once it happened, that means the
+   * Socket(Stream) is transparent to ioCoro-context right now. but the user
+   * been got the Socket(stream) finished his work, then he should UNHIDE the
+   * 'magic' to let the ioCoro-context know "oh, i get a new guy."
    */
 public:
   void Unhide();

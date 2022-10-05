@@ -72,7 +72,7 @@ public:
    *      ...
    *      Timer tm([]{
    *        ...
-   *      }, sock);
+   *      }, stream);
    *
    *      tm.After(1d) // tm.After(1m) // tm.After(1s) // ... // tm.After(1us)
    *
@@ -84,15 +84,15 @@ public:
   void At(TimePoint const& tp);
 
   /**
-   * @brief decoupling the Timer and Socket, but the user must guarantees the
-   * action of Timer is not related the Socket
+   * @brief decoupling the Timer and Stream, but the user must guarantees the
+   * action of Timer is not related the Stream
    * 
    * @code
    *      Socket sock;
    *      ...
-   *      Timer tm(sock, []{
+   *      Timer tm([]{
    *        ...
-   *      });
+   *      }, stream);
    *
    *      tm.Detach();
    *
@@ -109,16 +109,16 @@ public:
    * Release() is designed for it.
    * 
    * @code
-   *      Socket sock;
+   *      Stream stream;
    *      ...
    *      Timer tm([]{
    *        ...
-   *      }, sock);
+   *      }, stream, 3s);
    *
    *      // drawing the START of the code block
    *      tm.Acquire();
    *
-   *      // The code block must be passed after 30 seconds at the latest,
+   *      // The code block must be passed after 3 seconds at the latest,
    *      // otherwise the deadline will be triggered 
    *       tm.After(1d) or tm.After(1m) or tm.After(1s) or ... or tm.After(1us)
    *
@@ -134,7 +134,7 @@ public:
    *      {
    *          DeadLine line([]{
    *            ...
-   *          }, sock, 1s);
+   *          }, stream, 3s);
    * 
    *          ...
    *      }

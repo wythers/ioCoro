@@ -29,14 +29,14 @@ struct ioCoroSyscall
  *
  * @cond must be in Coroutine to call the syscall
  * @code
- *      ssize_t ret = co_await ioCoroRead(sock, buf, num);
- * @arg sock, a Socket type
+ *      ssize_t ret = co_await ioCoroRead(stream, buf, num);
+ * @arg stream, a Stream type
  * @arg buf, an address of byte chunk
- * @arg num, the chunk max size you want to read
+ * @arg num, the chunk max size
  * @return how many bytes are received
  *
  * @note ioCoro-context guarantees that all data is received under normal
- * conditions, otherwise the socket status is changed to reflect an error
+ * conditions, otherwise the stream status is changed to reflect an error
  *
  * @ingroup user-context
  */
@@ -90,14 +90,14 @@ struct ioCoroCompletedRead : ioCoroRead
  *
  * @cond must be in Coroutine to call the syscall
  * @code
- *      ssize_t ret = co_await ioCoroWrite(sock, buf, num);
- * @arg sock, a Socket type
+ *      ssize_t ret = co_await ioCoroWrite(stream, buf, num);
+ * @arg stream, a Stream type
  * @arg buf, an address of byte chunk
- * @arg num, the chunk max size you want to write
+ * @arg num, the chunk size
  * @return how many bytes are sent
  *
  * @note ioCoro-context guarantees that all data is sent under normal
- * conditions, otherwise the socket status is changed to reflect an error
+ * conditions, otherwise the stream status is changed to reflect an error
  *
  * @ingroup user-context
  */
@@ -150,13 +150,13 @@ struct ioCoroCompletedWrite : ioCoroWrite
  *
  * @cond must be in Coroutine to call the syscall
  * @code
- *      co_await ioCoroConnect(sock, ip, port);
- * @arg sock, a Socket type
- * @arg host, char const*, the server hostname
+ *      co_await ioCoroConnect(stream, host);
+ * @arg stream, a Stream type
+ * @arg host, char const*, the server hostname("x.x.x.x:port" or "domain name:port")
  * @return void
  *
- * @note ioCoro-context guarantees that the Conncet will finish under normal
- * conditions, otherwise the socket status is changed to reflect an error
+ * @note ioCoro-context guarantees that the Conncetion will be finished under normal
+ * conditions, otherwise the stream status is changed to reflect an error
  *
  * @ingroup user-context
  */
@@ -182,17 +182,17 @@ struct ioCoroConnect : ioCoroSyscall
  *
  * @cond must be in Coroutine to call the syscall
  * @code
- *      auto [ret, idx] = co_await ioCoroRead(sock, buf, num, delim);
- * @arg sock, a Socket type
+ *      auto [ret, idx] = co_await ioCoroRead(stream, buf, num, delim);
+ * @arg stream, a Stream type
  * @arg buf, an address of byte chunk
- * @arg num, the chunk max size you want to read
+ * @arg num, the chunk max size
  * @arg delim, char const*, the terminate string
  * @return
  *  @arg ret, how many bytes are received
  *  @arg idx, the position of the delim in the buffer(chunk)
  *
  * @note ioCoro-context guarantees that all data is received OR meets the
- * terminate string(delim) under normal conditions, otherwise the socket
+ * terminate string(delim) under normal conditions, otherwise the stream
  * status is changed to reflect an error
  *
  * @ingroup user-context
