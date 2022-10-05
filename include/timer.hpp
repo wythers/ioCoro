@@ -68,7 +68,7 @@ public:
    * @brief the Timer is triggered after some time
    * 
    * @code:
-   *      Socket sock;
+   *      Stream stream;
    *      ...
    *      Timer tm([]{
    *        ...
@@ -88,7 +88,7 @@ public:
    * action of Timer is not related the Stream
    * 
    * @code
-   *      Socket sock;
+   *      Stream stream;
    *      ...
    *      Timer tm([]{
    *        ...
