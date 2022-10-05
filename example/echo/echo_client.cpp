@@ -15,7 +15,7 @@ int main()
         {
                 for (int j = 0; j < 30000; ++j)
                 {
-                        client.Submit("localhost:1024", ++i);
+                        client.Submit("localhost:1024", "HELLO, IOCORO!\n", ++i);
                 }
 
                 sleep(1);

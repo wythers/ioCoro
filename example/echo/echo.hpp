@@ -17,13 +17,13 @@ struct Echo
 /**
  * @brief the max default response time
  */
-static constexpr auto DefualtMaxResponseTimeForServer = 2s;
-static constexpr auto DefualtMaxResponseTimeForClient = 2s;
+static constexpr auto DefualtMaxResponseTimeForServer = 4s;
+static constexpr auto DefualtMaxResponseTimeForClient = 4s;
 
         /**
          *  the ioCoro entry of client end
          */
-        static IoCoro<void> Active(Stream stream, char const* host, uint id)
+        static IoCoro<void> Active(Stream stream, char const* host, char const* uppercases, uint id)
         {
                 // guarantees the stream(socket) reclaimed by the ioCoro-context
                 unique_stream cleanup([=]{
@@ -35,8 +35,6 @@ static constexpr auto DefualtMaxResponseTimeForClient = 2s;
                         DeadLine line([&]{
                                 stream.Close();
                         }, stream, DefualtMaxResponseTimeForClient);
-
-                        char const* uppercases = "HELLO, IOCORO!\n";
 
                         // try to connect the server
                         co_await ioCoroConnect(stream, host);
