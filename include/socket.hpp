@@ -54,10 +54,6 @@ public:
    *      or
    *      Call ioCoroRead(...);
    *
-   * @note Why use Bool-returnValue??? because we need hook coroutine local
-   * varaible to let Iocoro-context pass some sensitive value, emm.. sounds like
-   * using linux syscall, right?
-   *
    * @ingroup user-context && ioCoro-context
    */
   bool Read(void*& buf, ssize_t& len, ssize_t& total);
