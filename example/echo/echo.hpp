@@ -43,14 +43,14 @@ static constexpr auto DefualtMaxResponseTimeForClient = 2s;
                         if (CHECKINGERROR(stream, id))
                                 co_return;
 
-                        // try to send the Uppercase string to the server
+                        // try to send the Uppercase string to the server, and then shutdown the Write stream
                         co_await ioCoroCompletedWrite(stream, uppercases, strlen(uppercases));
                         if (CHECKINGERROR(stream, id))
                                 co_return;
 
                         char lowercase[32]{};
 
-                        // try to get the lowercase string sent back from the server
+                        // try to get the lowercase string sent back from the server, and and then shutdown the Read stream
                         co_await ioCoroCompletedRead(stream, lowercase, sizeof(lowercase));
                         if (CHECKINGERROR(stream, id))
                                 co_return;
@@ -80,7 +80,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 2s;
 
                         char lowercases[32]{};
 
-                        // try to get the Uppercase string sent from the client
+                        // try to get the Uppercase string sent from the client, and then shutdown the Read stream
                         ssize_t ret = co_await ioCoroCompletedRead(streaming, lowercases, sizeof(lowercases));
                         if (CHECKINGERROR(streaming))
                                 co_return;
@@ -88,7 +88,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 2s;
                         // translate the Uppercase string just obtained from the client to the lowercase
                         to_lowercases(lowercases, lowercases, ret);
 
-                        // try back to send the lowercase string just translated to the client
+                        // try back to send the lowercase string just translated to the client, and then shutdown the Write stream
                         co_await ioCoroCompletedWrite(streaming, lowercases, ret);
                         if (CHECKINGERROR(streaming))
                                 co_return;
