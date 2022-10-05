@@ -19,18 +19,18 @@ struct _empty_call
  * @brief the RAII guard for Socket type
  *
  * @code:
- *        unique_socket cleanup([]{
+ *        unique_stream cleanup([]{
  *          ...
  *        }, sock, sock, sock, ...);
  *
  * @ingroup user-context
  */
 template<CanBeInvoked F = _empty_call>
-struct unique_socket
+struct unique_stream
 {
-  unique_socket() = delete;
-  unique_socket(unique_socket&) = delete;
-  unique_socket& operator=(unique_socket const&) = delete;
+  unique_stream() = delete;
+  unique_stream(unique_stream&) = delete;
+  unique_stream& operator=(unique_stream const&) = delete;
 
   template<typename... Args>
   constexpr void helper(Socket& s, Args&&... args)
@@ -45,7 +45,7 @@ struct unique_socket
   {}
 
   template<AreAllSockets... Args>
-  unique_socket(F&& f, Args&&... args)
+  unique_stream(F&& f, Args&&... args)
     : sock(nullptr)
     , func(forward<F>(f))
   {
@@ -53,20 +53,20 @@ struct unique_socket
   }
 
   template<AreAllSockets... Args>
-  unique_socket(Socket& s, Args&&... args)
+  unique_stream(Socket& s, Args&&... args)
     : sock(nullptr)
     , func(F{})
   {
     helper(s, forward<Args>(args)...);
   }
 
-  unique_socket(unique_socket&& m)
+  unique_stream(unique_stream&& m)
   {
     sock = m.sock;
     func = move(m.func);
   }
 
-  ~unique_socket()
+  ~unique_stream()
   {
     func();
     

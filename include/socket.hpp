@@ -31,7 +31,7 @@ public:
   {};
 
   template<CanBeInvoked>
-  friend struct unique_socket;
+  friend struct unique_stream;
 
 public:
   Socket(Ios& ios);

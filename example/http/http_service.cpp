@@ -5,7 +5,7 @@ using namespace http;
 IoCoro<void> Http::Active(Stream stream, char const* host, char const* path, uint id)
 {
         // guarantees the stream(socket) reclaimed by the ioCoro-context
-        unique_socket cleanup([=]{
+        unique_stream cleanup([=]{
                 printf("REQUEST #%d%s" , id, " has completed.\n");
         }, stream); 
 
@@ -91,7 +91,7 @@ IoCoro<void> Http::Active(Stream stream, char const* host, char const* path, uin
 IoCoro<void> Http::Passive(Stream streaming)
 {
         // guarantees the stream(socket) reclaimed by the ioCoro-context
-        unique_socket cleanup([]{
+        unique_stream cleanup([]{
                 printf("A GET-request just completed\n");
         }, streaming);
 

@@ -26,7 +26,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 2s;
         static IoCoro<void> Active(Stream stream, char const* host, uint id)
         {
                 // guarantees the stream(socket) reclaimed by the ioCoro-context
-                unique_socket cleanup([=]{
+                unique_stream cleanup([=]{
                         printf("REQUEST #%d has completed.\n", id);
                 }, stream);
 
@@ -68,8 +68,8 @@ static constexpr auto DefualtMaxResponseTimeForClient = 2s;
         static IoCoro<void> Passive(Stream streaming)
         {
                 // guarantees the stream(socket) reclaimed by the ioCoro-context
-                unique_socket cleanup([]{
-                printf("A ECHO-request just completed\n");
+                unique_stream cleanup([]{
+                        printf("A ECHO-request just completed\n");
                 }, streaming);
 
                 // ensure REQUEST completion within the maximum time frame
