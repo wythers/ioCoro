@@ -1,12 +1,3 @@
-![This is an image](./images/hello-ioCoro.png)  
-
----  
- 
-# iocoro - be elegant, be efficient :stuck_out_tongue_winking_eye:  
-
-**ioCoro is an async-IO framework based on [cpp20Coroutine](https://www.scs.stanford.edu/~dm/blog/c++-coroutines.pdf).**  
-
-
 ## schedule
 1: ~~design core structure~~  
 2: ~~implement basic expectation~~  
