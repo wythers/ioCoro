@@ -106,11 +106,11 @@ public:
    *
    * @note A direct call is not recommended, A better way is like
    * @code:
-   *        unique_stream cleanup(stream);
+   *        unique_stream cleanup(stream, stream, stream, ...);
    *        or
    *        unique_stream cleanup([]{
    *             ...;
-   *        }, stream);
+   *        }, stream, stream, stream, ...);
    *
    * @note by the way, why does name the destructor Unhide, emm... the story is
    * that one of the ioCoro design ideas is every socket(stream) should be
@@ -137,11 +137,11 @@ public:
    * @brief an API for close
    * @ingroup user-context
    *
-   * @note check whether the socket is closed, you can do like
+   * @note check whether the Stream(Socket) is closed, you can do like
    * @code
-   *      if (sock)
+   *      if (stream)
    *      {
-   *        if (sock.StateCode() = errors::socke_closed)
+   *        if (stream.StateCode() = errors::socke_closed)
    *        {
    *           ...
    *        }

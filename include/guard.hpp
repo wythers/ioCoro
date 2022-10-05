@@ -16,12 +16,12 @@ struct _empty_call
 };
 
 /**
- * @brief the RAII guard for Socket type
+ * @brief the RAII guard for Stream(Socket) type
  *
  * @code:
  *        unique_stream cleanup([]{
  *          ...
- *        }, sock, sock, sock, ...);
+ *        }, stream, stream, stream, ...);
  *
  * @ingroup user-context
  */
@@ -88,7 +88,7 @@ struct unique_stream
  * @code:
  *        DeadLine line([]{
  *          ...
- *        }, sock, 1s);
+ *        }, stream, 1s);
  *
  * @ingroup user-context
  */
