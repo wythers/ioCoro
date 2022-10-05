@@ -7,9 +7,9 @@
 using namespace ioCoro;
 
 /**
- * @brief the echo client sends the Uppercase string of "HELLO, IOCORO\n" to the echo server, 
- * and then the server translates the string to the Lowercase of "hello, iocoro\n" and sends it back,  
- * at final the client displays the string  just obtained on the terminal.
+ * @brief the echo client sends the Uppercase string to the echo server, 
+ * and then the server translates the string to the Lowercase, and sends it back,  
+ * at final the client displays the string just obtained from the server on the terminal.
  */
 struct Echo
 {
