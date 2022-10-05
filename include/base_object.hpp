@@ -31,11 +31,11 @@ class SeviceModelBase
   Register_System_Interactive_Unit Socket;
   Register_System_Interactive_MultiUnit Timer;
 
-  Register_System_Interactive_MultiUnit AcceptOperation;
   Register_System_Buildin_Call PollOperation;
   Register_System_Buildin_Call ReadOperation;
   Register_System_Buildin_Call ReadUntilOperation;
   Register_System_Buildin_Call WriteOperation;
+  Register_System_Buildin_MultiCall AcceptOperation;
 
   Register_System_Call ioCoroRead;
   Register_System_Call ioCoroReadUntil;

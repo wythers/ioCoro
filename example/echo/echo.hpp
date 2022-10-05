@@ -69,7 +69,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 2s;
         {
                 // guarantees the stream(socket) reclaimed by the ioCoro-context
                 unique_stream cleanup([]{
-                        printf("A ECHO-request just completed\n");
+                        printf("An ECHO-request just completed\n");
                 }, streaming);
 
                 // ensure REQUEST completion within the maximum time frame

@@ -14,7 +14,13 @@
  *
  */
 #define Register_System_Call friend struct
+
 #define Register_System_Buildin_Call Register_System_Call
+
+#define Register_System_Buildin_MultiCall                                  \
+  template<typename>                                                           \
+  friend class
+
 
 /**
  *
