@@ -20,17 +20,26 @@ struct Echo
 static constexpr auto DefualtMaxResponseTimeForServer = 4s;
 static constexpr auto DefualtMaxResponseTimeForClient = 4s;
 
+        struct DataChunk
+        {
+                char const* uppercase{};
+                int id{};
+        };
+
         /**
          *  the ioCoro entry of client end
          */
-        static IoCoro<void> Active(Stream stream, char const* host, char const* uppercases, uint id)
+        static IoCoro<void> Active(Stream stream, char const* host, DataChunk const& chunk)
         {
+                // simpler to user the data chunk, dont worry this expression will be optimized by the compiler
+                auto const& [uppercases, id] = chunk;
+
                 // guarantees the stream(socket) reclaimed by the ioCoro-context
                 unique_stream cleanup([=]{
                         printf("REQUEST #%d has completed.\n", id);
                 }, stream);
 
-                // ensure REQUEST completion within the maximum time frame
+                // ensure REQUEST completion within the maximum time frame, and the time frame is 4s in the ECHO service
                 {
                         DeadLine line([&]{
                                 stream.Close();
@@ -101,16 +110,15 @@ static constexpr auto DefualtMaxResponseTimeForClient = 4s;
          *  the set of interfaces for error handling
          */ 
 
-        static inline bool CHECKINGERROR(Stream const& stream)
+        static bool CHECKINGERROR(Stream const& stream)
         {
                 return CHECKINGERROR(stream, 0, 0);
         }
 
-        static inline bool CHECKINGERROR(Stream const& stream, uint id)
+        static bool CHECKINGERROR(Stream const& stream, uint id)
         {
                 return CHECKINGERROR(stream, id, "ECHO-REQUSET");
         }
-
 
         static bool CHECKINGERROR(Stream const& stream, uint id, char const* label)
         {
