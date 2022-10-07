@@ -15,7 +15,6 @@ namespace ioCoro {
 
 namespace CoroDetails {
 
-template<typename T = void>
 struct IoCoro
 {
   struct promise

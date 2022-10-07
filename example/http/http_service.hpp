@@ -26,7 +26,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 15s;
          * 
          * @ingroup http-client end
          */
-        static IoCoro<void> Active(Stream stream, char const* host, char const* path, uint id);
+        static IoCoro Active(Stream stream, char const* host, char const* path, uint id);
 
         /**
          * @brief the ioCoro Entry for http server end
@@ -35,7 +35,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 15s;
          * 
          * @ingroup http-server end
          */
-        static IoCoro<void> Passive(Stream streaming);
+        static IoCoro Passive(Stream streaming);
 };
 
 } // namespace http

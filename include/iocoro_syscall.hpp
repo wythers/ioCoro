@@ -231,20 +231,4 @@ struct ioCoroReadUntil : ioCoroSyscall
   ssize_t total;
 };
 
-template<typename S>
-concept ServerEntrychecker = requires()
-{
-  {
-    S::Passive(Socket{})
-    } -> std::same_as<IoCoro<void>>;
-};
-
-template<typename S, typename... Args>
-concept ClientEntrychecker = requires(Args... args)
-{
-  {
-    S::Active(Socket{}, args...)
-    } -> std::same_as<IoCoro<void>>;
-};
-
 } // namespace ioCoro

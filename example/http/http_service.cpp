@@ -2,7 +2,7 @@
 
 using namespace http;
 
-IoCoro<void> Http::Active(Stream stream, char const* host, char const* path, uint id)
+IoCoro Http::Active(Stream stream, char const* host, char const* path, uint id)
 {
         // guarantees the stream(socket) reclaimed by the ioCoro-context
         unique_stream cleanup([=]{
@@ -88,7 +88,7 @@ IoCoro<void> Http::Active(Stream stream, char const* host, char const* path, uin
         co_return;
 }
 
-IoCoro<void> Http::Passive(Stream streaming)
+IoCoro Http::Passive(Stream streaming)
 {
         // guarantees the stream(socket) reclaimed by the ioCoro-context
         unique_stream cleanup([]{

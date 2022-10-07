@@ -29,7 +29,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 4s;
         /**
          *  the ioCoro entry of client end
          */
-        static IoCoro<void> Active(Stream stream, char const* host, DataChunk const& chunk)
+        static IoCoro Active(Stream stream, char const* host, DataChunk const& chunk)
         {
                 // simpler to user the data chunk, dont worry this expression will be optimized by the compiler
                 auto const& [uppercases, id] = chunk;
@@ -72,7 +72,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 4s;
         /**
          *  the ioCoro entry of server end
          */
-        static IoCoro<void> Passive(Stream streaming)
+        static IoCoro Passive(Stream streaming)
         {
                 // guarantees the stream(socket) reclaimed by the ioCoro-context
                 unique_stream cleanup([]{
