@@ -9,7 +9,7 @@ using namespace ioCoro;
 /**
  * @brief the echo client sends the Uppercase string to the echo server, 
  * and then the server translates the string to the Lowercase, and sends it back,  
- * at final the client displays the string just obtained from the server on the terminal.
+ * at final the client displays the Lowercases just obtained from the server on the terminal.
  */
 struct Echo
 {
@@ -31,7 +31,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 4s;
          */
         static IoCoro Active(Stream stream, char const* host, DataChunk const& chunk)
         {
-                // simpler to user the data chunk, dont worry this expression will be optimized by the compiler
+                // simpler to use the data chunk, dont worry this expression will be optimized by the compiler
                 auto const& [uppercases, id] = chunk;
 
                 // guarantees the stream(socket) reclaimed by the ioCoro-context
@@ -39,7 +39,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 4s;
                         printf("REQUEST #%d has completed.\n", id);
                 }, stream);
 
-                // ensure REQUEST completion within the maximum time frame, and the time frame is 4s in the ECHO service
+                // ensure REQUEST completion within the maximum time frame, and the time frame is 4s
                 {
                         DeadLine line([&]{
                                 stream.Close();
