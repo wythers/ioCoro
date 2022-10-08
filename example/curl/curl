@@ -1,0 +1,32 @@
+#!/bin/bash
+# curl.sh
+# **********************************************************************
+# This program is part of the source code released for the Curl example
+#  (c) Author: Wyther Yang
+#  GitHub repository:
+#  https://github.com/wythers/ioCoro
+# **********************************************************************
+# Brief Description:
+#
+# Only the download part of the curl is used.
+name=$(basename "$0")
+
+usage()
+{
+ echo "Usage: ${name} URL
+        - Only provide the valid URL; the ${name} will download the resource and 
+        then save it to the current directory.
+
+        - for examples:
+                $ ./curl www.baidu.com
+                $ ./curl https://www.scs.stanford.edu/~dm/blog/c++-coroutines.pdf"
+}
+
+[ $# -ne 1 ] && {
+ usage
+ exit 1
+}
+
+./download $1
+
+exit 0

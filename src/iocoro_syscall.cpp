@@ -233,8 +233,8 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
       if (s == 0)
         break;
 
-      if (s == -1 && errno != errors::try_again) {
-        m_s.UpdateState();
+      if (s != EAI_AGAIN) {
+        m_s.UpdateState(errors::network_unreachable);
         return false;
       }
     }

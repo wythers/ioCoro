@@ -28,7 +28,7 @@ endef
 
 %: %.cpp
 	@$(SAY) cc -o $@
-	@g++ -pthread -fcoroutines -latomic -Wall -std=c++20 -O3 -o $@ $^ -liocoro 
+	@g++ -pthread -fcoroutines -latomic -Wall -std=c++20 -O3 -o $@ $^ -liocoro 2>/dev/null
 
 %.o: %.cpp
 	@$(SAY) cc -c -o $@
