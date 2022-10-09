@@ -43,17 +43,17 @@ The ioCoro has two interfaces, the entries that the `Active` for Client end, `Pa
 ```c++
 struct Echo
 {
-  // the ioCoro entry of client end
-  static IoCoro Active(Stream stream, char const* host, int id)
-  {
-   ...
-  }
+    // the ioCoro entry of client end
+    static IoCoro Active(Stream stream, char const* host, int id)
+    {
+    ...
+    }
 
-  // the ioCoro entry of server end
-  static IoCoro Passive(Stream streaming)
-  {
-   ...
-  }
+    // the ioCoro entry of server end
+    static IoCoro Passive(Stream streaming)
+    {
+    ...
+    }
 };
 ```  
 What does the `Stream` mean and `IoCoro`? Em... I know you have many questions, but be patient.  
@@ -76,7 +76,7 @@ Finally, if you are careful enough, you will find the arg name is different in b
 Next, we will implement both interfaces(entries) with ioCoroSysCall, let's go!  
 
 
-### 3. Implementation  
+### 3. Apply two basic components   
 It is valuable to introduce two special and tricky components provided by ioCoro before implementing the basic logic, they are:
 - `ioCoro::unique_stream`
 - `ioCoro::Deadline`
@@ -92,142 +92,159 @@ struct Echo
 
 static constexpr auto DefualtMaxResponseTime = 2s;
          
-  // the ioCoro entry of server end
-  static IoCoro Passive(Stream streaming)
-  {
-     // guarantees the stream(socket) reclaimed by the ioCoro-context
-     unique_stream cleanup([]{
-                printf("An ECHO-request just completed\n");
-     }, streaming);
-
-     // ensure the block will be passed within the maximum time frame
-     {
-         DeadLine line([&]{
-                  streaming.Close();
-         }, streaming, DefualtMaxResponseTime);
-
-         // logic implementation
-         ...
-     }
-  }
-
-    // the ioCoro entry of client end
-  static IoCoro Active(Stream stream, char const* host, int id)
-  {
-      // guarantees the stream(socket) reclaimed by the ioCoro-context
-    unique_stream cleanup([&]{
-      if (!stream)
-        printf("ECHO-REQUEST #%d has completed.\n", id);
-      else
-        fprintf(stderr, 
-              "ECHO-REQUEST #%d failed, ERROR CODE:%d, ERROR MESSAGE:%s.\n",
-              id,
-              stream.StateCode(),
-              stream.ErrorMessage().data());
-    }, stream);
-
-    // ensure the block will be passed within the maximum time frame
+    // the ioCoro entry of server end
+    static IoCoro Passive(Stream streaming)
     {
-        DeadLine line([&]{
-                 stream.Close();
-        }, stream, DefualtMaxResponseTime);
+      // guarantees the stream(socket) reclaimed by the ioCoro-context
+      unique_stream cleanup([]{
+                  printf("An ECHO-request just completed\n");
+      }, streaming);
 
-        // logic implementation
-        ...
+      // ensure the block will be passed within the maximum time frame
+      {
+          DeadLine line([&]{
+                  streaming.Close();
+          }, streaming, DefualtMaxResponseTime);
+
+          // logic implementation
+          ...
+      }
     }
-  }
+
+      // the ioCoro entry of client end
+    static IoCoro Active(Stream stream, char const* host, int id)
+    {
+        // guarantees the stream(socket) reclaimed by the ioCoro-context
+      unique_stream cleanup([&]{
+        if (!stream)
+          printf("ECHO-REQUEST #%d has completed.\n", id);
+        else
+          fprintf(stderr, 
+                  "ECHO-REQUEST #%d failed, ERROR CODE:%d, ERROR MESSAGE:%s.\n",
+                  id,
+                  stream.StateCode(),
+                  stream.ErrorMessage().data());
+      }, stream);
+
+      // ensure the block will be passed within the maximum time frame
+      {
+          DeadLine line([&]{
+                  stream.Close();
+          }, stream, DefualtMaxResponseTime);
+
+          // logic implementation
+          ...
+      }
+    }
 };
 ```  
+Well, we are finally coming to the last step to completing our service, keep going guys.  
+  
+### 4. Implement the basic logic with ioCoroSyscall
+
+ioCoro is an async-IO framework it provides some IO-related operations. The most basic three are:  
+- `ioCoroConnect(stream, host)`  
+- `ioCoroRead(stream, buf, num)`  
+- `ioCoroWrite(stream, buf, num)`  
+Their usage is not surprising, but their calling method is a little unusual. If you want call them, you must do like this:
+- `ssize_t ret = co_await ioCoroRead(stream, buf, num)`
+- `ssize_t ret = co_await ioCoroWrite(stream, buf, num)`  
+
   
 Before complete the rest of our service class, similarly here we need to introduce one of the ioCoro design ideas:
 
-> ioCoro does not handle errors for users, but only reflects errors  
+> ioCoro does not handle errors for users, but only reflects errors.  
+
   
-With ioCoroSysCall, we can complete the rest of our ECHO service. so the complete service class is like this:
+With ioCoroSysCall, we can complete the rest of our ECHO service. so the completed service class is like this:
 ```c++
 struct Echo
 {
 
 static constexpr auto DefualtMaxResponseTime = 2s;
-         
-  // the ioCoro entry of server end
-  static IoCoro Passive(Stream streaming)
-  {
-     // guarantees the stream(socket) reclaimed by the ioCoro-context
-     unique_stream cleanup([]{
-                printf("An ECHO-request just completed\n");
-     }, streaming);
-
-     // ensure the block will be passed within the maximum time frame
-     {
-         DeadLine line([&]{
-                  streaming.Close();
-         }, streaming, DefualtMaxResponseTime);
-         
-         char lowercases[32]{};
-
-         // try to get the Uppercase string sent from the client, and then shutdown the Read stream
-         ssize_t ret = co_await ioCoroCompletedRead(streaming, lowercases, sizeof(lowercases));
-         if (streaming)
-           co_return;
-         
-         // translate the Uppercase string just obtained from the client to the lowercase
-         to_lowercases(lowercases, lowercases, ret);
-
-         // try back to send the lowercase string just translated to the client, and then shutdown the Write stream
-         co_await ioCoroCompletedWrite(streaming, lowercases, ret);
-         if (streaming)
-           co_return;
-     }
-     co_return;
-  }
-
-  // the ioCoro entry of client end
-  static IoCoro Active(Stream stream, char const* host, int id)
-  {
-    // guarantees the stream(socket) reclaimed by the ioCoro-context
-    unique_stream cleanup([&]{
-      if (!stream)
-        printf("ECHO-REQUEST #%d has completed.\n", id);
-      else
-        fprintf(stderr, 
-              "ECHO-REQUEST #%d failed, ERROR CODE:%d, ERROR MESSAGE:%s.\n",
-              id,
-              stream.StateCode(),
-              stream.ErrorMessage().data());
-    }, stream);
-
-    // ensure the block will be passed within the maximum time frame
+          
+    // the ioCoro entry of server end
+    static IoCoro Passive(Stream streaming)
     {
-        DeadLine line([&]{
-                 stream.Close();
-        }, stream, DefualtMaxResponseTime);
+      // guarantees the stream(socket) reclaimed by the ioCoro-context
+      unique_stream cleanup([]{
+                  printf("An ECHO-request just completed\n");
+      }, streaming);
 
-        // try to connect the server
-        co_await ioCoroConnect(stream, host);
-        if (stream)
-          co_return;
-        
-        char const* uppercases = "HELLO, IOCORO!\n";
-        
-        // try to send the Uppercase string to the server, and then shutdown the Write stream
-        co_await ioCoroCompletedWrite(stream, uppercases, strlen(uppercases));
-        if (stream)
-          co_return;
-        
-        char lowercase[32]{};
+      // ensure the block will be passed within the maximum time frame
+      {
+          DeadLine line([&]{
+                  streaming.Close();
+          }, streaming, DefualtMaxResponseTime);
+          
+          char lowercases[32]{};
 
-        // try to get the lowercase string sent back from the server, and and then shutdown the Read stream
-        co_await ioCoroCompletedRead(stream, lowercase, sizeof(lowercase));
-        if (stream)
-           co_return;
-           
-        // display the lowercase string on the terminal
-        printf("%s", lowercase);
+          // try to get the Uppercase string sent from the client
+          // and then shutdown the Read stream
+          ssize_t ret = co_await ioCoroCompletedRead(streaming, lowercases, sizeof(lowercases));
+          if (streaming)
+            co_return;
+          
+          // translate the Uppercase string just obtained from the client to the lowercase
+          to_lowercases(lowercases, lowercases, ret);
+
+          // try back to send the lowercase string just translated to the client
+          // and then shutdown the Write stream
+          co_await ioCoroCompletedWrite(streaming, lowercases, ret);
+          if (streaming)
+            co_return;
+      }
+      co_return;
     }
-    
-    co_return;
-  }
+
+    // the ioCoro entry of client end
+    static IoCoro Active(Stream stream, char const* host, int id)
+    {
+      // guarantees the stream(socket) reclaimed by the ioCoro-context
+      unique_stream cleanup([&]{
+        if (!stream)
+          printf("ECHO-REQUEST #%d has completed.\n", id);
+        else
+          fprintf(stderr, 
+                  "ECHO-REQUEST #%d failed, ERROR CODE:%d, ERROR MESSAGE:%s.\n",
+                  id,
+                  stream.StateCode(),
+                  stream.ErrorMessage().data());
+      }, stream);
+
+      // ensure the block will be passed within the maximum time frame
+      {
+          DeadLine line([&]{
+                  stream.Close();
+          }, stream, DefualtMaxResponseTime);
+
+          // try to connect the server
+          co_await ioCoroConnect(stream, host);
+          if (stream)
+            co_return;
+          
+          char const* uppercases = "HELLO, IOCORO!\n";
+          
+          // try to send the Uppercase string to the server 
+          // and then shutdown the Write stream
+          co_await ioCoroCompletedWrite(stream, uppercases, strlen(uppercases));
+          if (stream)
+            co_return;
+          
+          char lowercase[32]{};
+
+          // try to get the lowercase string sent back from the server 
+          // and and then shutdown the Read stream
+          co_await ioCoroCompletedRead(stream, lowercase, sizeof(lowercase));
+          if (stream)
+            co_return;
+            
+          // display the lowercase string on the terminal
+          printf("%s", lowercase);
+      }
+      
+      co_return;
+    }
 };
 
 ```
