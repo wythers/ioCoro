@@ -258,12 +258,12 @@ int main()
     client.Join();
 }
 ```  
-- And Server,  
+- And server,  
 ```c++
 int main()
 {
     // loads our service at server end
-    Server<Echo> server{":1024"};
+    ioCoro::Server<Echo> server{":1024"};
     
     // let ioCoro maintain our Echo service right now
     server.Run();
