@@ -272,7 +272,7 @@ int main()
     server.Run();
 }
 ```  
-No matter in the real world or the computer world, the world will be better if we take our responsibilities, as we just did, right?  
+No matter in the real world or the computer world, the world will be better if everyone takes their own responsibility, as we just did, right? 
 
 ### 6. Summary  
-In this section, we meet the target of implementing the simple ECHO service step by step. I believe you have a basic understanding of ioCoro, which is exactly what I hope. For reasons of readability and space constraints, only the key parts of the source code are displayed above. To view the complete source code, build it, and run it, please click here.
+In this section, we meet the target of implementing the simple ECHO service step by step. I believe you have a basic understanding of ioCoro, which is exactly what I hope. For reasons of readability and space constraints, only the key parts of the source code are displayed above. To view the complete source code, build it, and run it, please click [here](./example/echo/echo.hpp).
