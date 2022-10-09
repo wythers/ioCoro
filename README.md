@@ -1,3 +1,10 @@
+[![C++20](https://img.shields.io/badge/language-C%2B%2B20-blue)](https://en.cppreference.com/w/cpp/20)
+![compiler](https://img.shields.io/badge/compiler-gcc-red)
+[![license](https://img.shields.io/badge/license-GPL--3.0-green)](https://github.com/wythers/ioCoro/blob/main/LICENSE)
+![platform Linux 64-bit](https://img.shields.io/badge/platform-Linux%2064--bit-yellow)
+![Latest release](https://img.shields.io/badge/latest%20release-2.o-lightgrey)
+![Io](https://img.shields.io/badge/io-async-yellow)
+![Event](https://img.shields.io/badge/event%20processing%20mode-proactor-orange)  
 
 ---
 
@@ -5,13 +12,6 @@
 
 ---
 
-[![C++20](https://img.shields.io/badge/language-C%2B%2B20-blue)](https://en.cppreference.com/w/cpp/20)
-![compiler](https://img.shields.io/badge/compiler-gcc-red)
-[![license](https://img.shields.io/badge/license-GPL--3.0-green)](https://github.com/wythers/ioCoro/blob/main/LICENSE)
-![platform Linux 64-bit](https://img.shields.io/badge/platform-Linux%2064--bit-yellow)
-![Latest release](https://img.shields.io/badge/latest%20release-2.o-lightgrey)
-![Io](https://img.shields.io/badge/io-async-yellow)
-![Event](https://img.shields.io/badge/event%20processing%20mode-proactor-orange)
  
 # ioCoro - be elegant, be efficient :stuck_out_tongue_winking_eye:  
 
@@ -23,7 +23,7 @@
 
  ### 1. Clarify the mechanism  
  First, we must explain the running mechanism of our ECHO-service, so there is the mechanism:  
- - The echo-client end sends the Uppercase string("HELLO, IOCORO!\n") to the echo-server end.
+ - The echo-client sends the Uppercase string("HELLO, IOCORO!\n") to the echo-server.
  - And then the server translates the string to the Lowercase("hello, iocoro!\n"), and sends it back.
  - At final the client displays the Lowercases just obtained from the server on the terminal.  
  
@@ -275,4 +275,4 @@ int main()
 No matter in the real world or the computer world, the world will be better if everyone takes their own responsibility, as we just did, right? 
 
 ### 6. Summary  
-In this section, we meet the target of implementing the simple ECHO service step by step. I believe you have a basic understanding of ioCoro, which is exactly what I hope. For reasons of readability and space constraints, only the key parts of the source code are displayed above. To view the complete source code, build it, and run it, please click [here](./example/echo/echo.hpp).
+In this section, we meet the target of implementing the simple ECHO service step by step. I believe you have a basic understanding of ioCoro, which is exactly what I hope. For reasons of readability and space constraints, only the key parts of the source code are displayed above. To view the complete source code, build it, and run it, please click [here](./example/echo).
