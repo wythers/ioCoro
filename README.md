@@ -5,9 +5,6 @@
 ![Latest release](https://img.shields.io/badge/latest%20release-2.o-lightgrey)
 ![Io](https://img.shields.io/badge/io-async-yellow)
 ![Event](https://img.shields.io/badge/event%20processing%20mode-proactor-orange)  
-
----
-
 ![This is an image](./images/hello-ioCoro.png)  
 
 ---
