@@ -281,7 +281,7 @@ In this section, we meet the target of implementing the simple ECHO service step
 2. You can be building the libiocoro as follows:  
 ```bash
 foo@bar:~$ git clone https://github.com/wythers/ioCoro.git
-foo@bar:~$ make
+foo@bar:~$ cd ioCoro && make
 ```  
 3. Include and linker
 ```c++
@@ -330,7 +330,7 @@ Efficiency is one of the design goals of ioCoro which depends on the performance
     server.Reserver(10000);
     server.Run();
 ```  
-* Try you best to declare variables in the ioCoro Entry(coroutine-context), even if it is huge block data. It is far better to assign the data chunk at one time by coroutine than to fragment it in coroutine. At the same time, frequent `delete` are also avoided.  
+* Try your best to declare variables in the ioCoro Entry(coroutine-context), even if it is huge block data. It is far better to allocate the data chunk at one time by coroutine than fragmentally to do in coroutine. At the same time, frequent `delete` are also avoided.  
   
 * If you don't need the Timer, you shouldn't define `NEED_IOCORO_TIMER`, at this time, ioCoro is almost a lock-free process, which is very exciting.  
   
@@ -340,6 +340,6 @@ Efficiency is one of the design goals of ioCoro which depends on the performance
     auto [num, pos] = co_await ioCoroReadUntil(stream, buf, num, "\r\n\r\n");
 ```  
   
-* The right number of workers is also the key, this requires the user to adjust step by step according to his service.  `ioCoro` provides the `THREADS_NUM` macro to do. The default number is to multiply the number of platform cores by 2, which may be a good choose.  
+* The right number of workers is also the key, this requires the user to adjust step by step according to the service.  `ioCoro` provides the `THREADS_NUM` macro to do. The default number is to multiply the number of platform cores by 2, which may be a good choose.  
 
 
