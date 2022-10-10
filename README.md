@@ -272,4 +272,22 @@ int main()
 No matter in the real world or the computer world, the world will be better if everyone takes their own responsibility, as we just did, right? 
 
 ### 6. Summary  
-In this section, we meet the target of implementing the simple ECHO service step by step. I believe you have a basic understanding of ioCoro, which is exactly what I hope. For reasons of readability and space constraints, only the key parts of the source code are displayed above. To view the complete source code, build it, and run it, please click [here](./example/echo).
+In this section, we meet the target of implementing the simple ECHO service step by step. I believe you have a basic understanding of ioCoro, which is exactly what I hope. For reasons of readability and space constraints, only the key parts of the source code are displayed above. To view the complete source code, build it, and run it, please click [here](./example/echo).  
+  
+## Advance  
+  
+### Building
+1. You must be in the Linux environment, and then your `GCC` compiler must support c++20(-fcoroutines), and C++ concept. I am sorry to say I hate `Clang` sometimes it's annoying because it always reports what it thinks are simplified errors hard for to me get the root cause but a workaround, please I am not stupid, ok? And theoretically, you can compile with clang, but you should rewrite the makefile.  
+2. You can be building the libiocoro as follows:  
+```bash
+foo@bar:~$ git clone https://github.com/wythers/ioCoro.git
+foo@bar:~$ make
+```  
+3. Include and linker
+```c++
+#include <iocoro/iocoro.hpp>
+```
+```shell
+foo@bar:~$ g++ ... -liocoro
+```  
+That's enough, Next, i want to talk deeper about ioCoro.  
