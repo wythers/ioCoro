@@ -347,5 +347,5 @@ Efficiency is one of the design goals of ioCoro which depends on the performance
 As a framework implemented with CPP, of course, flexibility cannot be bypassed,  ioCoro also has good flexibility. I believe you can feel it in the above areas,  besides ioCoro allows you to implement yourself ioCoroSyscall, which is a very interesting story, and I can't wait to implement a customized ioCoroSyscall with you in another more advanced introduction that will be [here](./advance).  
   
 ## Final
-**Needless to say, Please allow me to repeat:**  
+**Needless to say, please allow me to repeat:**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-*be elegant, be efficient.:love_you_gesture:*  
