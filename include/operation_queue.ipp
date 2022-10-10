@@ -19,18 +19,18 @@ Op_queue<Op>::PushBack(Op* inFront, Op* inBack)
 }
 
 template<IsOperationType Op>
-	template<typename OtherOperation>
-	void
-	Op_queue<Op>::PushBack(Op_queue<OtherOperation>& inOther)
-	{
-		if (inOther.IsEmpty())
-			return;
+template<typename OtherOperation>
+void
+Op_queue<Op>::PushBack(Op_queue<OtherOperation>& inOther)
+{
+  if (inOther.IsEmpty())
+    return;
 
-		Op* inFront = static_cast<Op*>(inOther.Front());
-		Op* inBack = static_cast<Op*>(inOther.Back());
+  Op* inFront = static_cast<Op*>(inOther.Front());
+  Op* inBack = static_cast<Op*>(inOther.Back());
 
-		PushBack(inFront, inBack);
-	}
+  PushBack(inFront, inBack);
+}
 
 template<IsOperationType Op>
 void
