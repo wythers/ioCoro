@@ -319,4 +319,27 @@ Once this member method is called, some corresponding responsibilities will be t
   
 ### Exception  
 
-ioCoro only throws exceptions when a fatal error occurs, usually in the initialization phase of the ioCoro-context, or when the Linux running environment changes, such as the firewall enabling prohibition, etc.
+ioCoro only throws exceptions when a fatal error occurs, usually in the initialization phase of the ioCoro-context, or when the Linux running environment changes, such as the firewall enabling prohibition, etc.  
+  
+### Perference
+Efficiency is one of the design goals of ioCoro which depends on the performance of cpp20coroutine, the implementation of ioCoro is not a performance bottleneck if you follow the below ways:  
+* Give a hint to let the `ioCoro Server` have a initial estimate of the upcoming load, you can do like this:
+```c++
+    ioCoro::Server<service> server{...};
+    // assume that more than 10000 streams will arrive
+    server.Reserver(10000);
+    server.Run();
+```  
+* Try you best to declare variables in the ioCoro Entry(coroutine-context), even if it is huge block data. It is far better to assign the data chunk at one time by coroutine than to fragment it in coroutine. At the same time, frequent `delete` are also avoided.  
+  
+* If you don't need the Timer, you shouldn't define `NEED_IOCORO_TIMER`, at this time, ioCoro is almost a lock-free process, which is very exciting.  
+  
+* Make good use of the return value of ioCoroSyscall to achieve one traversal to obtain enough data information in the chunk, you just got. Such as follows:  
+```c++
+    // the pos is where the delim("\r\n\r\n") first appeared in the buf
+    auto [num, pos] = co_await ioCoroReadUntil(stream, buf, num, "\r\n\r\n");
+```  
+  
+* The right number of workers is also the key, this requires the user to adjust step by step according to his service.  `ioCoro` provides the `THREADS_NUM` macro to do. The default number is to multiply the number of platform cores by 2, which may be a good choose.  
+
+
