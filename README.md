@@ -330,16 +330,22 @@ Efficiency is one of the design goals of ioCoro which depends on the performance
     server.Reserver(10000);
     server.Run();
 ```  
-* Try your best to declare variables in the ioCoro Entry(coroutine-context), even if it is huge block data. It is far better to allocate the data chunk at one time by coroutine than fragmentally to do in coroutine. At the same time, frequent `delete` are also avoided.  
+* Try your best to declare variables in the ioCoro Entry(coroutine-context), even if it is huge block data. It is far better to allocate the data chunk at one time by the coroutine than fragmentally to do in the coroutine. At the same time, frequent `delete` are also avoided.  
   
 * If you don't need the Timer, you shouldn't define `NEED_IOCORO_TIMER`, at this time, ioCoro is almost a lock-free process, which is very exciting.  
   
-* Make good use of the return value of ioCoroSyscall to achieve one traversal to obtain enough data information in the chunk, you just got. Such as follows:  
+* Make good use of the return value of ioCoroSyscall to achieve one traversal to obtain enough data information in the buffer, you just got. Such as follows:  
 ```c++
     // the pos is where the delim("\r\n\r\n") first appeared in the buf
     auto [num, pos] = co_await ioCoroReadUntil(stream, buf, num, "\r\n\r\n");
 ```  
   
 * The right number of workers is also the key, this requires the user to adjust step by step according to the service.  `ioCoro` provides the `THREADS_NUM` macro to do. The default number is to multiply the number of platform cores by 2, which may be a good choose.  
-
-
+  
+### Flexibility  
+  
+As a framework implemented with CPP, of course, flexibility cannot be bypassed,  ioCoro also has good flexibility. I believe you can feel it in the above areas,  besides ioCoro allows you to implement yourself ioCoroSyscall, which is a very interesting story, and I can't wait to implement a customized ioCoroSyscall with you in another more advanced introduction that will be [here](./advance).  
+  
+## Final
+**Needless to say, Please allow me to repeat:**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-*be elegant, be efficient.:love_you_gesture:*  
