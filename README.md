@@ -290,4 +290,33 @@ foo@bar:~$ make
 ```shell
 foo@bar:~$ g++ ... -liocoro
 ```  
-That's enough, Next, i want to talk deeper about ioCoro.  
+That's enough. Next, i want to talk deeper about ioCoro.  
+
+
+### Timer  
+Here I want to introduce the third design idea of ioCoro:  
+  
+> Provides requirements, but does not force use.  
+
+Using Timer will impact performance. Some needs the requirement and others do not, so the ioCoro‘s choice is that provides the Timer modularized. If define `NEED_IOCORO_TIMER`, the Timer module will work without the need to recompile libiocoro and vice versa.  
+  
+Again, the fourth design idea:  
+  
+> Make user should be, but must be.  
+   
+`ioCoro::Timer` always is coupling the `Stream` in User-context by default, like this:
+```c++
+    ioCoro::Timer tm([]{
+        ....
+    }, stream);
+```  
+Why?, because the ioCoro doesn't know the user's Timer whether references the coroutine local variable, For safe, it chooses the coupling by default.
+It is a must-be, not a should-be if ioCoro does not provide a method to decouple the relation. the method is:
+```c++
+    ioCoro::Timer::detach();
+```  
+Once this member method is called, some corresponding responsibilities will be taken by the user.  
+  
+### Exception  
+
+ioCoro only throws exceptions when a fatal error occurs, usually in the initialization phase of the ioCoro-context, or when the Linux running environment changes, such as the firewall enabling prohibition, etc.
