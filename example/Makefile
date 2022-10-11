@@ -1,6 +1,6 @@
 -include ./pattern.mk
 
-MODS := curl echo http
+MODS := curl echo http swap 
 
 
 
