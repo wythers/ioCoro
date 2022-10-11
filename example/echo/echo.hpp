@@ -17,8 +17,8 @@ struct Echo
 /**
  * @brief the max default response time
  */
-static constexpr auto DefualtMaxResponseTimeForServer = 4s;
-static constexpr auto DefualtMaxResponseTimeForClient = 4s;
+static constexpr auto DefualtMaxResponseTimeForServer = 2s;
+static constexpr auto DefualtMaxResponseTimeForClient = 2s;
 
         struct DataChunk
         {
@@ -39,7 +39,7 @@ static constexpr auto DefualtMaxResponseTimeForClient = 4s;
                         printf("REQUEST #%d has completed.\n", id);
                 }, stream);
 
-                // ensure REQUEST completion within the maximum time frame, and the time frame is 4s
+                // ensure REQUEST completion within the maximum time frame, and the time frame is 2s
                 {
                         DeadLine line([&]{
                                 stream.Close();
