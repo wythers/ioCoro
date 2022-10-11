@@ -252,7 +252,7 @@ int main()
     ioCoro::Client<Echo> client{};
     
     // 100'000 connections at a 10'000/sec rate, as a small case. 
-    // On my computer, with 4 threads, a 30'000/sec rate in 2s, it is okay.
+    // On my computer, with 4 threads, a 30'000/sec rate, and 2s of maximum response time, it is okay.
     // Why do you not try to run it on your computer?
     for (int i = 0; i < 100000;)
     {

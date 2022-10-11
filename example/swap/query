@@ -15,7 +15,7 @@ usage()
 {
  echo "Usage: ${name} TypeOfCar
         - Only provide the car type; the ${name} will get the price
-          from the server after several swapers. But However, the server keeps a limited price list, 
+          from the server after several swapers. But the server keeps a limited price list, 
           and the types of cars that are not in this price list are unknown.
 
         - The list is:
