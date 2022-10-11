@@ -32,8 +32,7 @@ AcceptOperation<Sv>::AcceptInit(Ios& ios, char const* ip, int port)
   static_cast<Operation>(impl->Op) = { &SocketImpl::MaintainOperation::perform,
                                        nullptr };
 
-  struct sockaddr_in Addr
-  {};
+  struct sockaddr_in Addr{};
   Addr.sin_family = AF_INET;
   if (ip) {
     inet_pton(AF_INET, ip, &(Addr.sin_addr));
