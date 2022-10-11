@@ -251,7 +251,9 @@ int main()
     // loads our service at client end
     ioCoro::Client<Echo> client{};
     
-    // 100'000 connection at 10'000/second rate
+    // 100'000 connections at a 10'000/sec rate, as a small case. 
+    // On my computer, with 4 cores, a 30'000/sec rate in 2s, it is okay.
+    // Why do you not try to run it on your computer?
     for (int i = 0; i < 100000;)
     {
         for (int j = 0; j < 10000; ++j)
