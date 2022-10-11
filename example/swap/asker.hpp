@@ -18,7 +18,8 @@ static constexpr auto DefaultMaxTimeOfWaiting = 2s;
                         if (!stream)
                                 printf("%s: %s\n", car, price);
                         else 
-                                printf("Failed to get the price.\n");
+                                printf("Failed to get the price, ERORR:%s\n",
+                                stream.ErrorMessage().data());
                 }, stream);
 
                 {
