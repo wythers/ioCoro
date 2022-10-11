@@ -251,9 +251,16 @@ int main()
     // loads our service at client end
     ioCoro::Client<Echo> client{};
     
-    // Does remember the two parameters we defined at Client Entry?
-    client.Submit("localhost:1024", 1);
-   
+    // 100'000 connection at 10'000/second rate
+    for (int i = 0; i < 100000;)
+    {
+        for (int j = 0; j < 10000; ++j)
+        {
+            // Does remember the two parameters we defined at Client Entry?
+            client.Submit("localhost:1024", ++i);
+        }
+        sleep(1);
+    }   
     // similar to std::thread::join(),
     client.Join();
 }
