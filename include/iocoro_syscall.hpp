@@ -5,6 +5,11 @@
 #pragma once
 
 #include "iocoro_syscall_impl.hpp"
+
+#ifdef NEED_IOCORO_TIMER
+#include "timer.hpp"
+#endif
+
 #include <netdb.h>
 #include <string_view>
 #include <unordered_map>
@@ -78,11 +83,7 @@ struct ioCoroCompletedRead : ioCoroRead
   {
   }
 
-  ssize_t await_resume()
-  {
-    m_s.ShutdownRead();
-    return total;
-  }
+  inline ssize_t await_resume();
 };
 
 /**
@@ -138,11 +139,7 @@ struct ioCoroCompletedWrite : ioCoroWrite
   {
   }
 
-  ssize_t await_resume()
-  {
-    m_s.ShutdownWrite();
-    return total;
-  }
+  inline ssize_t await_resume();
 };
 
 /**
@@ -152,11 +149,12 @@ struct ioCoroCompletedWrite : ioCoroWrite
  * @code
  *      co_await ioCoroConnect(stream, host);
  * @arg stream, a Stream type
- * @arg host, char const*, the server hostname("x.x.x.x:port" or "domain name:port")
+ * @arg host, char const*, the server hostname("x.x.x.x:port" or "domain
+ * name:port")
  * @return void
  *
- * @note ioCoro-context guarantees that the Conncetion will be finished under normal
- * conditions, otherwise the stream status is changed to reflect an error
+ * @note ioCoro-context guarantees that the Conncetion will be finished under
+ * normal conditions, otherwise the stream status is changed to reflect an error
  *
  * @ingroup user-context
  */
@@ -184,19 +182,49 @@ struct ioCoroConnect : ioCoroSyscall
  * @code
  *      co_await ioCoroReconnect(stream, host);
  * @arg stream, a Stream type
- * @arg host, char const*, the server hostname("x.x.x.x:port" or "domain name:port")
+ * @arg host, char const*, the server hostname("x.x.x.x:port" or "domain
+ * name:port")
  * @return void
  *
- * @note ioCoro-context guarantees that the Reconncetion will be finished under normal
- * conditions, otherwise the stream status is changed to reflect an error
+ * @note ioCoro-context guarantees that the Reconncetion will be finished under
+ * normal conditions, otherwise the stream status is changed to reflect an error
  *
  * @ingroup user-context
  */
-inline ioCoroConnect ioCoroReconnect(Socket& inS, char const* inHost)
+inline ioCoroConnect
+ioCoroReconnect(Socket& inS, char const* inHost);
+
+/**
+ * @brief ioCoroSyscall
+ *
+ * @cond must be in Coroutine to call the syscall
+ * @code
+ *      co_await ioCoroSuspendFor(stream, elapse);
+ * @arg stream, a Stream type
+ * @arg elapse, duration<..., ...>.
+ * @return void
+ *
+ * @note ioCoro-context guarantees that the ioCoroSuspendFor will be finished
+ * under normal conditions.
+ *
+ * @ingroup user-context
+ */
+#ifdef NEED_IOCORO_TIMER
+template<typename Rep, typename Period>
+struct ioCoroSuspendFor : ioCoroSyscall
 {
-  inS.Refresh();
-  return {inS, inHost};
-}
+  ioCoroSuspendFor(Socket& inS, std::chrono::duration<Rep, Period> const& inE)
+    : m_s(inS)
+    , elapse(inE)
+  {
+  }
+
+  inline bool await_suspend(std::coroutine_handle<> h);
+
+  Socket& m_s;
+  std::chrono::duration<Rep, Period> const& elapse;
+};
+#endif
 
 /**
  * @brief ioCoroSyscall
@@ -235,11 +263,7 @@ struct ioCoroReadUntil : ioCoroSyscall
 
   bool await_suspend(std::coroutine_handle<> h);
 
-  pair<ssize_t, size_t> await_resume()
-  {
-    return { total,
-             static_cast<char const*>(pos) - static_cast<char const*>(start) };
-  }
+  inline pair<ssize_t, size_t> await_resume();
 
   Socket& m_s;
   void* buf;
@@ -253,3 +277,5 @@ struct ioCoroReadUntil : ioCoroSyscall
 };
 
 } // namespace ioCoro
+
+#include "iocoro_syscall.ipp"

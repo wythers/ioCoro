@@ -9,10 +9,6 @@
 
 #include "guard.hpp"
 
-#ifdef NEED_IOCORO_TIMER
-#include "timer.hpp"
-#endif
-
 namespace ioCoro {
 
 } // namespace ioCoro
