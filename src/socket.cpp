@@ -117,6 +117,30 @@ Socket::Unhide()
   }
 }
 
+void
+Socket::Refresh()
+{
+  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, m_fd_copy, 0);
+  ::close(m_fd_copy);
+
+  for (;;) {
+    m_fd_copy = socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    if (m_fd_copy < 0)
+      std::this_thread::yield();
+    else
+      break;
+    errno = 0;
+  }
+
+  epoll_event ev{};
+  ev.events = EPOLLERR | EPOLLHUP | EPOLLPRI;
+  ev.data.ptr = static_cast<void*>(&(m_object_ptr->Ops));
+
+  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, m_fd_copy, &ev);
+
+  m_state = update_error();
+}
+
 bool
 Socket::ReadUntil(void*& buf,
                   ssize_t& len,

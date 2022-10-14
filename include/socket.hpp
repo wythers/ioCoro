@@ -16,9 +16,9 @@ using std::string_view;
 namespace ioCoro {
 
 /**
- * @note the @class Stream, an alias of @class Socket, and @class Socket types are conceptually
- * different in both the first is used in User-context, the second
- * ioCoro-context.
+ * @note the @class Stream, an alias of @class Socket, and @class Socket types
+ * are conceptually different in both the first is used in User-context, the
+ * second ioCoro-context.
  */
 class Socket
 {
@@ -90,6 +90,10 @@ public:
 
   inline void ClosedState() const noexcept;
 
+  inline bool IsKeepAlive() const noexcept;
+
+  inline void KeepAlive() noexcept;
+
   /**
    * @brief a set of getting IoCoro-context partial data API
    * @ingroup user-context
@@ -122,6 +126,7 @@ public:
    */
 public:
   void Unhide();
+  void Refresh();
 
   /**
    * @brief a set of internal FD control API
@@ -166,6 +171,8 @@ private:
    * in non-iocoro-context, accessing the State is not thread safe
    */
   mutable SocketState m_state{};
+
+  bool m_keepalive{};
 
   Socket* m_next{};
 };

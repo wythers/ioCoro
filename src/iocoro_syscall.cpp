@@ -187,6 +187,9 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
 {
   errno = 0;
 
+  if (m_s)
+    return false; 
+
   /**
    * the ioCoro local host database
    */

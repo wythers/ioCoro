@@ -8,6 +8,9 @@ Socket::operator bool() const noexcept
 {
   if (rx_load(m_object_ptr->m_closed))
     ClosedState();
+  else if (IsKeepAlive() && (m_state.value() == errors::socket_closed ||
+                             m_state.value() == errors::connection_reset))
+    UpdateState(errors::timed_out);
 
   return static_cast<bool>(m_state);
 }
@@ -89,6 +92,18 @@ void
 Socket::ClosedState() const noexcept
 {
   m_state = { errors::socket_closed, get_socket_closed_error_category() };
+}
+
+void
+Socket::KeepAlive() noexcept
+{
+  m_keepalive = true;
+}
+
+bool
+Socket::IsKeepAlive() const noexcept
+{
+  return m_keepalive;
 }
 
 } // namespace ioCoro

@@ -182,6 +182,27 @@ struct ioCoroConnect : ioCoroSyscall
  *
  * @cond must be in Coroutine to call the syscall
  * @code
+ *      co_await ioCoroReconnect(stream, host);
+ * @arg stream, a Stream type
+ * @arg host, char const*, the server hostname("x.x.x.x:port" or "domain name:port")
+ * @return void
+ *
+ * @note ioCoro-context guarantees that the Reconncetion will be finished under normal
+ * conditions, otherwise the stream status is changed to reflect an error
+ *
+ * @ingroup user-context
+ */
+inline ioCoroConnect ioCoroReconnect(Socket& inS, char const* inHost)
+{
+  inS.Refresh();
+  return {inS, inHost};
+}
+
+/**
+ * @brief ioCoroSyscall
+ *
+ * @cond must be in Coroutine to call the syscall
+ * @code
  *      auto [ret, idx] = co_await ioCoroRead(stream, buf, num, delim);
  * @arg stream, a Stream type
  * @arg buf, an address of byte chunk
