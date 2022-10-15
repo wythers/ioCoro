@@ -41,6 +41,8 @@ class SeviceModelBase
   Register_System_Call ioCoroReadUntil;
   Register_System_Call ioCoroWrite;
   Register_System_Call ioCoroConnect;
+  Register_System_Call ioCoroReconnect;
+  Register_System_MultiCall ioCoroSuspendFor;
 
 protected:
   /**

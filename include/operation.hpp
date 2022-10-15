@@ -12,6 +12,22 @@ namespace ioCoro {
 /**
  *
  */
+struct _empty_call
+{
+  constexpr void operator()() noexcept {}
+};
+
+/**
+ *
+ */
+struct _empty_call_has_return
+{
+  constexpr bool operator()() noexcept { return true; }
+};
+
+/**
+ *
+ */
 struct Operation
 {
   typedef void (*Func_type)(Operation*);

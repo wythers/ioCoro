@@ -9,8 +9,8 @@ static std::mt19937 mt(gRandomDevice());
 inline float
 RandDeltaTime()
 {
-  static std::uniform_real_distribution<float> distribution(0.246666681f,
-                                                            0.286666681f);
+  static std::uniform_real_distribution<float> distribution(0.2f,
+                                                            0.3f);
   return distribution(mt);
 }
 

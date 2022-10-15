@@ -8,8 +8,8 @@ Socket::operator bool() const noexcept
 {
   if (rx_load(m_object_ptr->m_closed))
     ClosedState();
-  else if (IsKeepAlive() && (m_state.value() == errors::socket_closed ||
-                             m_state.value() == errors::connection_reset))
+  else if (IsKeepAlive() && (m_state.value() == errors::at_eof ||
+                            m_state.value() == errors::not_connected))
     UpdateState(errors::timed_out);
 
   return static_cast<bool>(m_state);

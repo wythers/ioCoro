@@ -132,13 +132,17 @@ Socket::Refresh()
     errno = 0;
   }
 
+  errno = 0;
   epoll_event ev{};
   ev.events = EPOLLERR | EPOLLHUP | EPOLLPRI;
   ev.data.ptr = static_cast<void*>(&(m_object_ptr->Ops));
 
-  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, m_fd_copy, &ev);
-
-  m_state = update_error();
+  int ret = epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, m_fd_copy, &ev);
+  
+  if (ret != 0)
+    m_state = update_error();
+  else 
+    m_state = update_error(0);
 }
 
 bool

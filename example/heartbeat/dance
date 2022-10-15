@@ -1,0 +1,39 @@
+#!/bin/bash
+# curl.sh
+# **********************************************************************
+# This program is part of the source code released for the Heartbeat example
+#  (c) Author: Wyther Yang
+#  GitHub repository:
+#  https://github.com/wythers/ioCoro
+# **********************************************************************
+# Brief Description:
+#
+# Query the car price through several swaps.
+name=$(basename "$0")
+
+usage()
+{
+ echo "Usage: ${name}
+        - let's see how a Handan person can complete the dance without being familiar with the dance steps.
+
+        - for examples:
+                $ ./dance"
+}
+
+[ $# -ne 0 ] && {
+ usage
+ exit 1
+}
+
+./brain &
+
+echo "Wait for the brain to be ready..."
+sleep 1
+
+./feet 2>/dev/null
+
+printf "\n"
+
+kill %1
+
+exit 0

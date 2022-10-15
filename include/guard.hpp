@@ -10,11 +10,6 @@
 
 namespace ioCoro {
 
-struct _empty_call
-{
-  constexpr void operator()() noexcept {}
-};
-
 /**
  * @brief the RAII guard for Stream(Socket) type
  *

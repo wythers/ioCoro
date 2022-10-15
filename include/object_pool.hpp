@@ -40,6 +40,8 @@ public:
   {
     //  memset(static_cast<void*>(old), 0, sizeof(SocketImpl));
     old->Next = nullptr;
+    rx_store(old->m_closed, false);
+    rx_store(old->Ops.m_to_do, false);
 
     while (!rel_compare_exchange_weak(m_pool, old->Next, old))
       ;

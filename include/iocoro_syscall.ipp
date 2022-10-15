@@ -26,11 +26,16 @@ ioCoroReconnect(Socket& inS, char const* inHost)
 }
 
 #ifdef NEED_IOCORO_TIMER
-template<typename Rep, typename Period>
+template<InvokedAndBoolReturn T, typename Rep, typename Period>
 bool
-ioCoroSuspendFor<Rep, Period>::await_suspend(std::coroutine_handle<> h)
+ioCoroSuspendFor<T, Rep, Period>::await_suspend(std::coroutine_handle<> h)
 {
-  Timer tmp([=] { h(); }, m_s);
+  Timer tmp(
+    [=, this] {
+      flag = func();
+      h();
+    },
+    m_s);
 
   tmp.Detach();
   tmp.After(elapse);

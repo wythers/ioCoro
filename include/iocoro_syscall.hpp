@@ -200,29 +200,55 @@ ioCoroReconnect(Socket& inS, char const* inHost);
  * @cond must be in Coroutine to call the syscall
  * @code
  *      co_await ioCoroSuspendFor(stream, elapse);
+ *      or
+ *      co_await ioCoroSuspendFor([]{
+ *        ...
+ *        return true;
+ *      }, stream, elapse);
+ * 
  * @arg stream, a Stream type
  * @arg elapse, duration<..., ...>.
- * @return void
+ * @return bool, return true by default.
  *
- * @note ioCoro-context guarantees that the ioCoroSuspendFor will be finished
- * under normal conditions.
+ * @note either the user does not provide a predecessor task, if it is provided,
+ * it must have a bool return value ioCoro-context guarantees that the
+ * ioCoroSuspendFor will be finished under normal conditions.
  *
  * @ingroup user-context
  */
 #ifdef NEED_IOCORO_TIMER
-template<typename Rep, typename Period>
+template<InvokedAndBoolReturn T = _empty_call_has_return,
+         typename Rep,
+         typename Period>
 struct ioCoroSuspendFor : ioCoroSyscall
 {
   ioCoroSuspendFor(Socket& inS, std::chrono::duration<Rep, Period> const& inE)
-    : m_s(inS)
+    : func(T{})
+    , m_s(inS)
     , elapse(inE)
+    , flag(true)
+  {
+  }
+
+  ioCoroSuspendFor(T&& inT,
+                   Socket& inS,
+                   std::chrono::duration<Rep, Period> const& inE)
+    : func(forward<T>(inT))
+    , m_s(inS)
+    , elapse(inE)
+    , flag(true)
   {
   }
 
   inline bool await_suspend(std::coroutine_handle<> h);
 
+  bool await_resume() { return flag; }
+
+  T func;
   Socket& m_s;
   std::chrono::duration<Rep, Period> const& elapse;
+
+  bool flag;
 };
 #endif
 

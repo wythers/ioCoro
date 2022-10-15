@@ -9,6 +9,9 @@ using namespace ioCoro;
 bool
 ioCoroRead::await_suspend(std::coroutine_handle<> h)
 {
+  if (m_s)
+    return false;
+
   ssize_t ret = 0;
   for (;;) {
     ret = ::read(m_s.GetFd(), buf, len);
@@ -53,6 +56,9 @@ ioCoroRead::await_suspend(std::coroutine_handle<> h)
 bool
 ioCoroReadUntil::await_suspend(std::coroutine_handle<> h)
 {
+  if (m_s)
+    return false;
+
   ssize_t ret = 0;
   int off = strlen(delim);
   string_view checker;
@@ -121,6 +127,9 @@ ioCoroReadUntil::await_suspend(std::coroutine_handle<> h)
 bool
 ioCoroWrite::await_suspend(std::coroutine_handle<> h)
 {
+  if (m_s)
+    return false;
+
   int ret = 0;
   for (;;) {
     /**

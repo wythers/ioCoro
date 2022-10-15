@@ -23,7 +23,8 @@ class Operation;
 
 template<typename... Args>
 struct __And : false_type
-{};
+{
+};
 
 template<typename... Args>
 struct __And<Socket, Args...>
@@ -33,7 +34,8 @@ struct __And<Socket, Args...>
 
 template<>
 struct __And<> : true_type
-{};
+{
+};
 
 template<typename... Args>
 concept AreAllSockets = __And<decay_t<Args>...>::value;
@@ -50,6 +52,14 @@ concept IsSocketOrCoroHandler = IsSocketType<T> || IsCoroHandler<T>;
 
 template<typename F>
 concept CanBeInvoked = std::is_invocable_v<decay_t<F>>;
+
+template<typename F>
+concept InvokedAndBoolReturn = CanBeInvoked<F> && requires(F f)
+{
+  {
+    f()
+    } -> std::convertible_to<bool>;
+};
 
 /**
  * service restrictions
