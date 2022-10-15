@@ -7,25 +7,24 @@
 
 #pragma once
 
-#include "operation.hpp"
-#include "operation_queue.hpp"
 #include "default_args.hpp"
 #include "mm_order.hpp"
+#include "operation.hpp"
+#include "operation_queue.hpp"
 
 #include <arpa/inet.h>
 #include <atomic>
 #include <mutex>
-#include <new>
 #include <netinet/in.h>
+#include <new>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-
 using std::atomic;
-using std::mutex;
 using std::byte;
 using std::launder;
+using std::mutex;
 
 namespace ioCoro {
 
@@ -59,10 +58,10 @@ struct SocketImpl
         return;
 
       auto* meta = launder(reinterpret_cast<MetaOperation*>(p->payload));
- 
+
       if ((*(meta))())
-       return;
-      
+        return;
+
       Operation* finish = static_cast<Operation*>(meta);
       (*finish)();
     }
@@ -99,6 +98,31 @@ struct SocketImpl
   } Op{};
 
 #define Seed Op.seed
+};
+
+
+/**
+ * 
+ */
+struct fd_t
+{
+  atomic<int> m_fd{};
+
+  fd_t(int inF = 0)
+    : m_fd(inF)
+  {
+  }
+
+  operator int() const { return m_fd.load(rx);}
+
+  atomic<int>& operator=(int inF)
+  {
+    rx_store(m_fd, inF);
+    return m_fd;
+  }
+
+  fd_t(fd_t const& inF) : m_fd(inF.m_fd.load(rx))
+  {}
 };
 
 } // namespace ioCoro

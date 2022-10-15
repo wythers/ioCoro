@@ -181,7 +181,7 @@ private:
 
   SeviceModelBase* m_ios{};
 
-  int m_fd_copy{};
+  fd_t m_fd_copy{};
 
   /**
    * in non-iocoro-context, accessing the State is not thread safe

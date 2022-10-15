@@ -28,6 +28,7 @@ struct Feet
                         printf("Oops, My brain dont work. Help, help ~~~\n");
                         co_return;
                 }
+                
                 // Open the errors::timed_out, let the ioCoro reflect it.
                 stream.KeepAlive();
                 for (;;)
@@ -37,7 +38,6 @@ struct Feet
                         co_await ioCoroReadUntil(stream, buf, sizeof(buf), "\n");
 
                        
-
                         //the feet may not respond in one of three chance
                         int timeval = RandInt(0, 2);
                         if (!timeval)

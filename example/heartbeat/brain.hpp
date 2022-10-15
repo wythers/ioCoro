@@ -51,8 +51,6 @@ static inline int const steps{10};
                                 co_return;
                         }
                         
-
-
                         if ("ok\n"sv == buf)
                         {
                 
