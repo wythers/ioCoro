@@ -120,12 +120,17 @@ Socket::Unhide()
 void
 Socket::Refresh()
 {
-  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, m_fd_copy, 0);
-  ::close(m_fd_copy);
+  /**
+   * we must make the SHUTDOWN before the CLOSE, otherwise, the disgusting ABA
+   * problem will come, so the TMP exists.
+   */
+  int tmp{};
+  
+  int fd = m_fd_copy.m_fd.load(rx);
 
   for (;;) {
-    m_fd_copy = socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    if (m_fd_copy < 0)
+    tmp = socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    if (tmp < 0)
       std::this_thread::yield();
     else
       break;
@@ -137,12 +142,17 @@ Socket::Refresh()
   ev.events = EPOLLERR | EPOLLHUP | EPOLLPRI;
   ev.data.ptr = static_cast<void*>(&(m_object_ptr->Ops));
 
-  int ret = epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, m_fd_copy, &ev);
-  
+  int ret = epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_ADD, tmp, &ev);
+
   if (ret != 0)
     m_state = update_error();
-  else 
+  else
     m_state = update_error(0);
+
+  m_fd_copy.m_fd.store(tmp, rx);
+
+  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, fd, 0);
+  ::close(fd);
 }
 
 bool
