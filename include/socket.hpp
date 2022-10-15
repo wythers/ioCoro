@@ -92,6 +92,22 @@ public:
 
   inline bool IsKeepAlive() const noexcept;
 
+  /**
+   * @brief Once this interface is called. the ioCoro will reflect the
+   * errors::timed_out error.
+   * 
+   * @code:
+   *      ...
+   *      if (stream)
+   *      {
+   *          if (stream.StateCode() == errors::timed_out)
+   *          {
+   *              ...
+   *              // you can reconnect the host, or do something else.
+   *              co_await ioCoroReconnect(stream, host);
+   *          }
+   *      }     
+   */
   inline void KeepAlive() noexcept;
 
   /**
