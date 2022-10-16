@@ -18,8 +18,9 @@ Socket::operator bool() const noexcept
 void
 Socket::Close()
 {
-  rx_store(m_object_ptr->m_closed, true);
   ShutdownReadAndWrite();
+
+  rx_store(m_object_ptr->m_closed, true);
 }
 
 void
