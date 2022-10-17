@@ -18,7 +18,9 @@ Socket::operator bool() const noexcept
 void
 Socket::Close()
 {
+  m_fd_copy.acq_locked();
   ShutdownReadAndWrite();
+  m_fd_copy.rx_unlocked();
 
   rx_store(m_object_ptr->m_closed, true);
 }

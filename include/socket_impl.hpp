@@ -100,29 +100,52 @@ struct SocketImpl
 #define Seed Op.seed
 };
 
-
 /**
- * 
+ *
  */
 struct fd_t
 {
-  atomic<int> m_fd{};
+  int fd{};
+  atomic<bool> lock{};
 
   fd_t(int inF = 0)
-    : m_fd(inF)
+    : fd(inF)
   {
   }
 
-  operator int() const { return m_fd.load(rx);}
+  operator int() const { return fd; }
 
-  atomic<int>& operator=(int inF)
+  fd_t& operator=(int inf)
   {
-    rx_store(m_fd, inF);
-    return m_fd;
+    fd = inf;
+    return *this;
   }
 
-  fd_t(fd_t const& inF) : m_fd(inF.m_fd.load(rx))
-  {}
+  fd_t(fd_t const& inF)
+    : fd(inF.fd)
+    , lock(inF.lock.load(rx))
+  {
+  }
+
+  void acq_locked()
+  {
+    bool expect;
+    do {
+      expect = false;
+    } while (!lock.compare_exchange_weak(expect, true, acq, rx));
+  }
+
+  void rx_locked()
+  {
+    bool expect;
+    do {
+      expect = false;
+    } while (!lock.compare_exchange_weak(expect, true, rx));
+  }
+
+  void rel_unlocked() { lock.store(false, rel); }
+
+  void rx_unlocked() { lock.store(false, rx); }
 };
 
 } // namespace ioCoro

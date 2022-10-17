@@ -103,30 +103,9 @@ Socket::Read(void*& buf, ssize_t& len, ssize_t& total)
 }
 
 void
-Socket::Unhide()
-{
-  Dealloc(m_ios->m_objects, m_object_ptr);
-
-  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, m_fd_copy, 0);
-
-  ::close(m_fd_copy);
-
-  if (m_ios->m_sock_num.fetch_sub(1, rx) == 1) {
-    m_ios->m_join.store(true, rx);
-    m_ios->m_join.notify_one();
-  }
-}
-
-void
 Socket::Refresh()
 {
-  /**
-   * we must make the SHUTDOWN before the CLOSE, otherwise, the disgusting ABA
-   * problem will come, so the TMP exists.
-   */
   int tmp{};
-  
-  int fd = m_fd_copy.m_fd.load(rx);
 
   for (;;) {
     tmp = socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
@@ -149,10 +128,36 @@ Socket::Refresh()
   else
     m_state = update_error(0);
 
-  m_fd_copy.m_fd.store(tmp, rx);
+  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, m_fd_copy, 0);
 
-  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, fd, 0);
-  ::close(fd);
+  /**
+   * we must make the SHUTDOWN before the CLOSE, otherwise, the disgusting ABA
+   * problem will come.
+   */
+  m_fd_copy.rx_locked();
+  ::close(m_fd_copy);
+  m_fd_copy = tmp;
+  m_fd_copy.rel_unlocked();
+}
+
+void
+Socket::Unhide()
+{
+  Dealloc(m_ios->m_objects, m_object_ptr);
+
+  epoll_ctl(m_ios->m_reactor.GetFd(), EPOLL_CTL_DEL, m_fd_copy, 0);
+
+  /**
+   * why is it closed directly instead of locked first? because in design, once
+   * unhide means that there is absolutely no escape Timer, unless
+   * Timer::detach() is called.
+   */
+  ::close(m_fd_copy);
+
+  if (m_ios->m_sock_num.fetch_sub(1, rx) == 1) {
+    m_ios->m_join.store(true, rx);
+    m_ios->m_join.notify_one();
+  }
 }
 
 bool
