@@ -8,7 +8,6 @@
 # **********************************************************************
 # Brief Description:
 #
-# Query the car price through several swaps.
 name=$(basename "$0")
 
 usage()
