@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "iocoro_syscall.hpp"
+#include "syscall.hpp"
 
 namespace ioCoro {
 

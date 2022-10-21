@@ -52,7 +52,7 @@ Timer<F>::Timer(F&& f, Socket& refS)
   , m_done{ false }
   , m_to_release{ nullptr }
 {
-  static_assert(CanBeInvoked<F>, "the timer second arg must be callably.");
+  static_assert(CanBeInvoked<F>, "the timer first arg must be callably.");
 
   m_task = Alloc<TimerOperation<decay_t<F>>>(forward<F>(f), m_done);
 }
