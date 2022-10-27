@@ -83,11 +83,10 @@ struct BaseOperation : Operation
 template<CanBeInvoked T>
 struct PostOperation : Operation
 {
-  PostOperation(T&& f, TaskPool& inPool, atomic<bool>& inJoin)
+  PostOperation(T&& f, TaskPool& inPool)
     : Operation(&perform)
     , func(std::forward<T>(f))
     , tasks(inPool)
-    , m_joinable(inJoin)
   {
     tasks.m_numm.fetch_add(1, rx);
   }
@@ -96,7 +95,6 @@ struct PostOperation : Operation
 
   T func;
   TaskPool& tasks;
-  atomic<bool>& m_joinable;
 };
 
 /**
