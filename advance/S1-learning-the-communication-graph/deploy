@@ -1,0 +1,37 @@
+#!/bin/bash
+# deploy.sh
+# **********************************************************************
+# This program is part of the source code released for ADI
+#  (c) Author: Wyther Yang
+#  GitHub repository:
+#  https://github.com/wythers/ioCoro
+# **********************************************************************
+# Brief Description:
+#
+name=$(basename "$0")
+
+# id :1024
+./main localhost:1024 localhost:1025 localhost:1027 &
+
+# id :1025
+./main localhost:1025 localhost:1024 localhost:1027 localhost:1026 &
+
+# id :1026
+./main localhost:1026 localhost:1025 localhost:1027 &
+
+# id :1027
+./main localhost:1027 localhost:1024 localhost:1025 localhost:1026 &
+
+
+echo "waiting 1 second..."
+
+sleep 1
+
+kill -10 %1
+
+sleep 1
+echo "start cleanup..."
+kill -9 %1
+kill -9 %2
+kill -9 %3
+kill -9 %4

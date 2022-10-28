@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package adi;
+
+message VertexInfo {
+  string id = 1;
+  string from = 2;
+  repeated string neighbors = 3;
+}
