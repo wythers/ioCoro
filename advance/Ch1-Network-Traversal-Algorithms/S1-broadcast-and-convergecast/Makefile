@@ -16,4 +16,4 @@ payload.pb.cc:
 	protoc --cpp_out=. payload.proto
 
 clean:
-	rm -rf launch at payload.o payload.pb.cc
+	rm -rf launch at payload.o payload.pb.cc payload.pb.h
