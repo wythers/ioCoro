@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package adi;
+
+message PayLoad {
+
+        message Pair {
+                string city = 1;
+                int32 temperature = 2;
+        }
+
+        enum Type {
+                START = 0;
+                GO = 1;
+                BACK = 2;
+                EMPTY = 3;
+        }
+
+        Type type = 1;
+
+        string From = 2;
+        string Request = 3;
+
+        repeated Pair pair = 4;
+}

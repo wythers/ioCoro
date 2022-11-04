@@ -1,0 +1,46 @@
+#!/bin/bash
+# At.sh
+# **********************************************************************
+# This program is part of the source code released for ADI
+#  (c) Author: Wyther Yang
+#  GitHub repository:
+#  https://github.com/wythers/ioCoro
+# **********************************************************************
+# Brief Description:
+#
+name=$(basename "$0")
+
+# GuangZhou
+./launch localhost:1024 localhost:1025 localhost:1027 localhost:1029 &
+
+# ZhenZhou
+./launch localhost:1025 localhost:1024 localhost:1026 localhost:1027 localhost:1028 localhost:1029 &
+
+# BeiJing
+./launch localhost:1026 localhost:1025 &
+
+# ShenZhen
+./launch localhost:1027 localhost:1024 localhost:1025 localhost:1029 &
+
+# XinJiang
+./launch localhost:1028 localhost:1025 &
+
+# WuHan
+./launch localhost:1029 localhost:1027 localhost:1024 localhost:1025 &
+
+sleep 1
+
+echo "-------------------------------"
+
+./at $1
+
+sleep 1
+echo "-------------------------------"
+
+kill -9 %1
+kill -9 %2
+kill -9 %3
+kill -9 %4
+kill -9 %5
+kill -9 %6
+
