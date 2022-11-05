@@ -28,6 +28,7 @@ class Vertex
                                 {
                                         lock_guard<mutex> locked(Vertex::g_vinfo.mtx);
 
+                                        // line 1
                                         Vertex::g_vinfo.parent = "root";
                                         Vertex::g_vinfo.expected_msg = Vertex::g_vinfo.neighbors.size();
                                 }
@@ -38,6 +39,7 @@ class Vertex
 
                                 string bytes(load.SerializeAsString());
 
+                                // line 2
                                 for (uint i = 0; i < Vertex::g_vinfo.neighbors.size(); ++i)
                                 {
                                         Vertex::g_sdr.Submit(Vertex::g_vinfo.neighbors[i], bytes);
@@ -54,8 +56,10 @@ class Vertex
                                 {
                                         lock_guard<mutex> locked(Vertex::g_vinfo.mtx);
 
+                                        // line 3
                                         if (Vertex::g_vinfo.parent == "")
                                         {
+                                                // line 4
                                                 Vertex::g_vinfo.parent = load.from();
                                                 Vertex::g_vinfo.expected_msg = Vertex::g_vinfo.neighbors.size() - 1;
                                         } 
@@ -63,7 +67,8 @@ class Vertex
                                         tmp = Vertex::g_vinfo.parent;
                                 }
 
-                                
+
+                                // line 5                
                                 if ((Vertex::g_vinfo.neighbors.size() - 1) == 0)
                                 {
                                         adi::PayLoad back{};
@@ -72,12 +77,14 @@ class Vertex
                                         auto* tmp = back.add_pair();
                                         tmp->set_temperature(Vertex::g_vinfo.temperature);
                                         tmp->set_city(Vertex::g_vinfo.city);
-
+                                         
+                                        // line 6
                                         Vertex::g_sdr.Submit(load.from(), back.SerializeAsString());
 
                                         co_return;
                                 } 
 
+                                // line 7
                                 if (tmp == from)
                                 {
                                         load.set_from(Vertex::g_vinfo.id);
@@ -92,6 +99,7 @@ class Vertex
                                         }
 
                                 } else {
+                                        // line 9
                                         load.set_type(adi::PayLoad::BACK);
                                         load.mutable_pair()->Clear();
                                         Vertex::g_sdr.Submit(load.from(), load.SerializeAsString());
@@ -105,9 +113,12 @@ class Vertex
                                 uint expect = 0;
                                 {
                                         lock_guard<mutex> locked(Vertex::g_vinfo.mtx);
+
+                                        // line 11
                                         expect = --Vertex::g_vinfo.expected_msg;
                                 
 
+                                        // line 12
                                         if (load.pair_size() != 0)
                                         {   
                                                 for (int i = 0; i < load.pair_size(); ++i)
@@ -119,6 +130,7 @@ class Vertex
                                         }
                                 }
 
+                                // line 13
                                 if (expect == 0)
                                 {
                                         string host{};
@@ -129,6 +141,7 @@ class Vertex
                                                 Vertex::g_vinfo.expected_msg = Vertex::g_vinfo.neighbors.size() - 1;
                                         }
                                         
+                                        // line 16
                                         if (host != "root")
                                         {
                                                 adi::PayLoad back{};
@@ -155,6 +168,7 @@ class Vertex
                                                         tmp = std::move(Vertex::g_vinfo.store);
                                                 }
                                                 
+                                                // line 17
                                                 printf("%s: %d°C\n", Vertex::g_vinfo.city.data(), Vertex::g_vinfo.temperature);
                                                 for (auto const& p : tmp)
                                                 {
