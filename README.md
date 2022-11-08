@@ -350,7 +350,14 @@ Efficiency is one of the design goals of ioCoro which depends on the performance
     auto [num, pos] = co_await ioCoroReadUntil(stream, buf, num, "\r\n\r\n");
 ```  
   
-* The right number of workers is also the key, this requires the user to adjust step by step according to the service.  `ioCoro` provides the `THREADS_NUM` macro to do. The default number is to multiply the number of platform cores by 2, which may be a good choose.  
+* The right number of workers is also the key, this requires the user to adjust step by step according to the service.  `ioCoro` provides the `THREADS_NUM` macro to do, or pass a uint arg:  
+```c++
+    // ...
+    ioCoro::Server<service> server{host, threads_num};
+    //...
+    ioCoro::Client<service> client{threads_num};
+```
+The default number is to multiply the number of platform cores by 2, which may be a good choose.  
   
 ### Flexibility  
   

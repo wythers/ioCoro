@@ -27,6 +27,17 @@ public:
   Server(char const* host);
 
   /**
+   * @code
+   *    Server<service> server{"localhost:80", n};
+   *    Server<service> server{":80", n};
+   *    Server<service> server{127.0.0.x:80, n};
+   *    Server<service> server{x.x.x.x:p, n};
+   */
+  Server(char const* host, uint threads)
+    : SeviceModelBase{ threads }
+  {}
+
+  /**
    * @brief for performance, if user have a certain estimate of the load, as a
    * hint, should tell to ioCoro-context through this interface
    *

@@ -44,6 +44,13 @@ class SeviceModelBase
   Register_System_Call ioCoroReconnect;
   Register_System_MultiCall ioCoroSuspendFor;
 
+public:
+  SeviceModelBase() = default;
+  SeviceModelBase(SeviceModelBase const&) = delete;
+
+  SeviceModelBase(uint threads) : m_tasks(threads)
+  {}
+
 protected:
   /**
    * @brief ioCoro does not maintain additional information about the
