@@ -26,7 +26,7 @@ build:
 	@$(UPDATELIB)
 	@$(SAY) ***building environment...                       [finish]
 
-	@$(MAKE) -s --directory=example mods
+#	@$(MAKE) -s --directory=example mods
 	
 	@$(SAY) --- All successfully, use -liocoro, as a g++ arg, to linker iocoro library...
 

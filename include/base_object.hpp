@@ -38,7 +38,7 @@ class SeviceModelBase
   Register_System_Buildin_MultiCall AcceptOperation;
 
   Register_System_Call ioCoroRead;
-  Register_System_Call ioCoroCompletedWrite;
+  Register_System_Call ioCoroCompletedRead;
   Register_System_Call ioCoroReadUntil;
   Register_System_Call ioCoroWrite;
   Register_System_Call ioCoroCompletedWrite;
