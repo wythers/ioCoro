@@ -18,7 +18,7 @@
 #define Register_System_Buildin_Call Register_System_Call
 
 #define Register_System_Buildin_MultiCall                                      \
-  template<typename>                                                           \
+  template<typename, typename...>                                                           \
   friend class
 
 #define Register_System_MultiCall                                              \

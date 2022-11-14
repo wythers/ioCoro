@@ -15,10 +15,12 @@
 #include "socket.hpp"
 
 #include <memory>
+#include <tuple>
 
 using std::coroutine_handle;
 using std::make_unique;
 using std::unique_ptr;
+using std::tuple;
 
 namespace ioCoro {
 
@@ -152,20 +154,43 @@ struct PollOperation : Operation
  * @note a buildin operation, should not be direct call from user
  *
  */
-template<typename Sv>
+template<typename Sv, typename... Args>
 struct AcceptOperation : Operation
 {
   using Coro_t = decltype(Sv::Passive);
 
-  AcceptOperation(Coro_t* incoro, Socket inSo)
+  AcceptOperation(Coro_t* incoro, Socket inSo, Args&&... args)
     : Operation{ &perform }
     , m_sock(inSo)
     , m_regular_coro(std::move(incoro))
+    , m_args{forward<Args>(args)...}
   {
   }
 
-  template<size_t N, typename... Args>
-  constexpr void Wrapper(Socket s, Args&&... args);
+  template<size_t N, typename... Tps>
+  static constexpr void Wrapper(Socket& s, Tps&&... args)
+  {
+    static_assert(N <= MaxOfStreamsAskedOnce, "beyond the max of streams asked once");
+
+    if constexpr (IsConsistentForServer<Sv, Socket, Tps...>) {
+      s.GetContext().m_tasks.Push(
+        Acquire<BaseOperation>(Sv::Passive(s, forward<Tps>(args)...), s));
+    } else
+      Wrapper<N + 1>(s, Socket{ s.GetContext() }, forward<Tps>(args)...);
+  }
+
+  template<size_t... Nums>
+  struct Helper
+  {
+    template<typename... Tps>
+    static constexpr void scatter(Socket& s, tuple<Tps...>& tp)
+    {
+      AcceptOperation::Wrapper<1>(s, std::get<Nums>(tp)...);
+    }
+  };
+  
+  template<size_t N>
+  using Dummy = Helper<__integer_pack(N)...>;
 
   void operator()();
 
@@ -175,11 +200,11 @@ struct AcceptOperation : Operation
     (*p)();
   }
 
-  static Socket AcceptInit(Ios& ios, char const* ip, int port);
-
   Socket m_sock;
 
   Coro_t* m_regular_coro;
+
+  tuple<decay_t<Args>...> m_args;
 };
 
 /**

@@ -4,59 +4,9 @@
 
 namespace ioCoro {
 
-template<typename Sv>
-  template<size_t N, typename... Args>
-  constexpr void
-  AcceptOperation<Sv>::Wrapper(Socket s, Args&&... args)
-  {
-    static_assert(N <= MaxOfStreamsAskedOnce, "beyond the max of streams asked once");
-
-    if constexpr (IsConsistentForServer<Sv, Socket, Args...>) {
-      m_sock.GetContext().m_tasks.Push(
-        Acquire<BaseOperation>(Sv::Passive(s, forward<Args>(args)...), s));
-    } else
-      Wrapper<N + 1>(s, Socket{ m_sock.GetContext() }, forward<Args>(args)...);
-  }
-
-template<typename Sv>
-Socket
-AcceptOperation<Sv>::AcceptInit(Ios& ios, char const* ip, int port)
-{
-  SocketImpl* impl = Alloc(ios.m_objects);
-
-  int fd = socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-
-  if (fd < 0)
-    throw_exception("Accept initialized failed");
-
-  static_cast<Operation>(impl->Op) = { &SocketImpl::MaintainOperation::perform,
-                                       nullptr };
-
-  struct sockaddr_in Addr{};
-  Addr.sin_family = AF_INET;
-  if (ip) {
-    inet_pton(AF_INET, ip, &(Addr.sin_addr));
-  } else {
-    Addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  }
-  Addr.sin_port = htons(port);
-
-  int ret = 0;
-  ret = ::bind(fd, (struct sockaddr*)(&(Addr)), sizeof(Addr));
-  if (ret == -1)
-    throw_exception("bind failed");
-
-  ret = ::listen(fd, MAX_LISTEN_CONNECT_NUM);
-  if (ret == -1)
-    throw_exception("listen failed");
-
-  Socket tmp{ ios, *impl, fd, Socket::Special{} };
-  return tmp;
-}
-
-template<typename Sv>
+template<typename Sv, typename... Args>
 void
-AcceptOperation<Sv>::operator()()
+AcceptOperation<Sv, Args...>::operator()()
 {
   for (;;) {
     sockaddr_in address{};
@@ -85,7 +35,7 @@ AcceptOperation<Sv>::operator()()
 
     Socket tmp{ ios, *impl, fd, Socket::Normal{} };
 
-    Wrapper<1>(tmp);
+    Dummy<sizeof...(Args)>::scatter(tmp, m_args);
   }
 }
 

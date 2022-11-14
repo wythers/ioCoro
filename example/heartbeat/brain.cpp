@@ -3,6 +3,7 @@
 int main()
 {
         Server<Brain> server(":1024");
+        Fctx Op{};
 
-        server.Run();
+        server.Run(&Op);
 }

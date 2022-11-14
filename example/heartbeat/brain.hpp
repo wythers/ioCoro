@@ -12,19 +12,22 @@ using std::mutex;
 using namespace ioCoro;
 using namespace std::string_view_literals;
 
+struct Fctx
+{
+        mutex mtx{};
+        std::string status{};
+
+        int const steps{10};
+};
+
 struct Brain
 {
 
-static inline mutex global_mtx{};
-static inline std::string status{};
-
-static inline int const steps{10};
-
-        static IoCoro Passive(Stream streaming)
+        static IoCoro Passive(Stream streaming, Fctx* Op)
         {
-                // waitting for control of the feet
-                global_mtx.lock();
-
+                // try to get control of the foot
+                Op->mtx.lock();
+                
                 unique_stream cleanup(streaming);
 
                 co_await ioCoroWrite(streaming, "s\n", 2);
@@ -45,26 +48,26 @@ static inline int const steps{10};
 
                         if (streaming)
                         {
-                                if (status.size() != 0)
-                                        status.pop_back();
-                                global_mtx.unlock();
+                                if (Op->status.size() != 0)
+                                        Op->status.pop_back();
+                                Op->mtx.unlock();
                                 co_return;
                         }
                         
                         if ("ok\n"sv == buf)
                         {
                 
-                                if (status.size() >= steps)
+                                if (Op->status.size() >= Op->steps)
                                 {
                                         
                                         co_await ioCoroWrite(streaming, "f\n", 2);
-                                        global_mtx.unlock();
+                                        Op->mtx.unlock();
                                         co_return;
                                 }
 
-                                status += "s";
+                                Op->status += "s";
                                 printf("\r__________");
-                                printf("\r%s", status.data());
+                                printf("\r%s", Op->status.data());
                                 fflush(stdout);
                         }
                 

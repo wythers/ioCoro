@@ -12,6 +12,7 @@ template<HasServerEntry Service>
 class Server : public SeviceModelBase
 {
   void Init(char const* host);
+  Socket AcceptInit(char const* ip, int port);
 
 public:
   Server() = delete;
@@ -35,7 +36,8 @@ public:
    */
   Server(char const* host, uint threads)
     : SeviceModelBase{ threads }
-  {}
+  {
+  }
 
   /**
    * @brief for performance, if user have a certain estimate of the load, as a
@@ -56,9 +58,32 @@ public:
    * OS-context makes everything fine, and coffee tasting, emm... a beautiful
    * day.
    *
+   * @note the @args all must have copy semantics, if some dont you may consider
+   * using std::ref to wrap some args, or pass ptrs.
+   * 
+   * @code for example:
+   * 
+   *  std::mutex mtx{};
+   * 
+   *  struct Service
+   *  {
+   *      static IoCoro Passive(Socket streaming, std::mutex* mtx)
+   *      {
+   *          ...
+   *      }
+   *  };
+   * 
+   *  ...
+   *    ioCoro::Server<Service> server{":1024"};
+   *    ...
+   *    
+   *    server.Run(&mtx);
+   *    
+   *
    * @ingroup user-context for server end
    */
-  void Run();
+  template<typename... Args>
+  void Run(Args&&... args);
 
 private:
   char m_ip[INET_ADDRSTRLEN]{ LOCALHOST };
