@@ -15,9 +15,9 @@
 > Making things simple but simpler is hard.
 
 ## 导言  
-**当引入一种新的编程语言或框架时，以`Hello，world’程序作为第一个示例已成为广泛接受的计算机编程传统，我很高兴遵循这种传统，来介绍ioCoro--异步IO服务框架。在本节中，你将跟随我一起来编写一个简单的ECHO网络服务程序。**  
-
- ### 1. 明确ECHO服务需求
+**当引入一种新的编程语言或框架时，以`Hello，world`程序作为第一个示例已成为广泛接受的计算机编程传统，我很高兴遵循这种传统，来介绍`ioCoro`--异步IO服务框架。在本节中，你将跟随我一起来编写一个简单的ECHO网络服务程序。**  
+  
+### 1. 明确ECHO服务需求
  首先，我们必须解释我们的ECHO服务的运行机制:  
  - echo客户端将大写字符串（“HELLO，IOCORO！\n”）发送到echo服务器。  
  - 然后服务器将字符串转换为小写（“hello，iocoro！\n”），并将其发回。  
@@ -25,7 +25,7 @@
  
 嗯，当我们明确了我们的需求后，开始实现我们的ECHO服务。  
   
- ### 2. 定义服务 
+### 2. 定义服务 
  我们可以定义我们的ECHO服务，像这样:  
  ```c++
  struct Echo
@@ -64,7 +64,7 @@ struct Echo
   static IoCoro Passive(Stream s1ing, Stream s2, Stream s3, stream s4, ...);
 ```  
 但唯一的限制是`Stream`必须位于用户定义的参数之前。另一个问题是`IoCoro`是什么东西？  
-嗯。。`IoCoro`不是一个用户(你)直接面对的组件，作为一个普通用户，不用在意它是什么，只要保留它，留下血淋淋的细节由ioCoro来实现。  
+嗯。。`IoCoro`不是一个用户(你)直接面对的组件，作为一个普通用户，不用在意它是什么，只需要保留它，留下血淋淋的细节由ioCoro来实现。  
   
 最后，如果你足够细心，你会发现两个接口中的参数名称不同，一个是`stream`，另一个是`streaming`，因为`stream`是`主动`的自由流，而`streaming`则是`被动`的完成流。自由流意味着它可以连接任何对等体。完成的流则是已经链接完毕的确定流。  
   
@@ -248,7 +248,7 @@ static constexpr auto DefualtMaxResponseTime = 2s;
 };
 ``` 
   
-到现在，作为用户，我们已经完美地履行了我们的责任，实现了我们的ECHO服务类。现在是时候驱动ioCoro履行它的职责的时候了。  
+到现在，作为用户，我们已经完美地履行了我们的责任--实现了我们的ECHO服务类。现在是时候驱动ioCoro履行它的职责了。  
   
 ### 5. 驱动ioCoro维护ECHO服务   
   
@@ -301,7 +301,7 @@ int main()
 无论是在现实世界还是计算机世界，如果每个人都像我们刚才那样承担起自己的责任，世界会变得更好，对吗？  
 
 ### 6. 总结 
-在本节中，我们逐步实现了我们的ECHO服务。我相信你对ioCoro有了基本的了解，这正是我所希望的。出于可读性和空间限制的原因，上面只显示了源代码的关键部分。要查看完整的源代码，构建并运行它，请单击[此处]（./example/echo）。   
+在本节中，我们逐步实现了我们的ECHO服务。我相信你对ioCoro有了基本的了解，这正是我所希望的。出于可读性和空间限制的原因，上面只显示了源代码的关键部分。要查看完整的源代码，构建并运行它，请单击[此处](./example/echo)。   
   
 ## 进阶  
   
@@ -330,7 +330,7 @@ foo@bar:~$ g++ ... -liocoro
   
 同样，第四个设计理念:   
   
-> Make user should be, but must be.  
+> Make user should do, but must do.  
 > 使用户应该做，而非必须做
    
 默认情况下，`ioCoro:：Timer`总是在用户上下文中耦合`Stream`，如下所示：
@@ -339,7 +339,7 @@ foo@bar:~$ g++ ... -liocoro
         ....
     }, stream);
 ```  
-为什么？因为ioCoro不知道用户的`Timer`是否引用了协程局部变量，为了安全起见，它默认选择了耦合。如果ioCoro没有提供解耦的方法，那么就是must-be，而非should-be。方法是:
+为什么？因为ioCoro不知道用户的`Timer`是否引用了协程局部变量，为了安全起见，它默认选择了耦合。如果ioCoro没有提供解耦的方法，那么就是must-do，而非should-do。方法是:
 ```c++
     ioCoro::Timer::Detach();
 ```  
@@ -362,7 +362,7 @@ ioCoro仅在发生致命错误时抛出异常，通常是在ioCoro上下文的�
 ```  
 * 尽量在ioCoroEntry（协程上下文）中声明变量，即使它是大的数据块。由协程创建时一次性分配比在协程上下文中进行散碎分配要好的多。同时，也避免了频繁的`delete`。
   
-* 如果你不需要`Timer`，则不应该定义`NEED_IOCORO_TIMER`，此时，IOCORO几乎是一个无锁程序，这非常令人兴奋。  
+* 如果你不需要`Timer`，则不应该定义`NEED_IOCORO_TIMER`，此时，ioCoro几乎是一个无锁程序，这非常令人兴奋。  
   
 * 充分利用`ioCoroSyscall`的返回值来达到一次遍历而获得足够的数据信息。例如：  
 ```c++
@@ -382,7 +382,7 @@ ioCoro仅在发生致命错误时抛出异常，通常是在ioCoro上下文的�
   
 ### Flexibility  
   
-作为一个用CPP实现的框架，当然不能绕过灵活性，ioCoro也有很好的灵活性。我相信你已经可以感受到这一点，此外，ioCoro允许你自己实现`ioCoroSyscall`，这是一个非常有趣的事，我迫不及待地想在另一个更高级的介绍中与你一起实现定制的`ioCoroSyscall`，该介绍将在[此处]（./advance）。 
+作为一个用CPP实现的框架，当然不能绕过灵活性，ioCoro也有很好的灵活性。我相信你已经可以感受到这一点，此外，ioCoro允许你自己实现`ioCoroSyscall`，这是一个非常有趣的事，我迫不及待地想在另一个更高级的介绍中与你一起实现定制的`ioCoroSyscall`，该介绍将在[此处](./advance)。 
   
 ## Final
 **Needless to say, please allow me to repeat:**  

@@ -313,7 +313,7 @@ Using Timer will impact performance. Some needs the requirement and others do no
   
 Again, the fourth design idea:  
   
-> Make user should be, but must be.  
+> Make user should do, but must do.  
    
 `ioCoro::Timer` always is coupling the `Stream` in User-context by default, like this:
 ```c++
@@ -322,9 +322,9 @@ Again, the fourth design idea:
     }, stream);
 ```  
 Why?, because the ioCoro doesn't know the user's Timer whether references the coroutine local variable, For safe, it chooses the coupling by default.
-It is a must-be, not a should-be if ioCoro does not provide a method to decouple the relation. the method is:
+It is a must-do, not a should-do if ioCoro does not provide a method to decouple the relation. the method is:
 ```c++
-    ioCoro::Timer::detach();
+    ioCoro::Timer::Detach();
 ```  
 Once this member method is called, some corresponding responsibilities will be taken by the user.  
   
