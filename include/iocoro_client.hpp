@@ -16,11 +16,9 @@ class Client : public SeviceModelBase
 
 public:
   Client();
-  Client(const Client&) = delete;
+  Client(uint threads);
   
-  Client(uint threads)
-    : SeviceModelBase{ threads }
-  {}
+  Client(const Client&) = delete;
 
   /**
    * @note the Args... must be consistent with the @arg... of the ioCoro

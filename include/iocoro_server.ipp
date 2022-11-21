@@ -60,6 +60,18 @@ Server<Service>::AcceptInit(char const* ip, int port)
 
 template<HasServerEntry Service>
 Server<Service>::Server(char const* host)
+: m_host(host)
+{
+  Init(host);
+
+  m_tasks.Push(
+    Alloc<PollOperation>(m_reactor, m_tasks, m_timer_holders, m_tasks.m_numm));
+}
+
+template<HasServerEntry Service>
+Server<Service>::Server(char const* host, uint threads)
+    : SeviceModelBase{ threads }
+    , m_host(host)
 {
   Init(host);
 

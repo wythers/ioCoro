@@ -31,6 +31,18 @@ Client<Service>::Client()
 }
 
 template<HasClientEntry Service>
+Client<Service>::Client(uint threads)
+  : SeviceModelBase{ threads }
+{
+  m_tasks.Push(
+    Alloc<PollOperation>(m_reactor, m_tasks, m_timer_holders, m_tasks.m_numm));
+
+  m_sock_num.fetch_add(1, rx);
+
+  m_tasks.Start();
+}
+
+template<HasClientEntry Service>
 template<typename... Args>
 void
 Client<Service>::Submit(Args&&... args)

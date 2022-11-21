@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package adi;
+
+message Payload {
+
+        enum Ans {
+                yes = 0;
+                no = 1;
+        }
+
+        uint32 type = 1;
+        string from = 2;
+        
+        int32 dist = 3;
+        Ans resp = 4; 
+}

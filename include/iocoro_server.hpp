@@ -34,10 +34,7 @@ public:
    *    Server<service> server{127.0.0.x:80, n};
    *    Server<service> server{x.x.x.x:p, n};
    */
-  Server(char const* host, uint threads)
-    : SeviceModelBase{ threads }
-  {
-  }
+  Server(char const* host, uint threads);
 
   /**
    * @brief for performance, if user have a certain estimate of the load, as a
@@ -60,11 +57,11 @@ public:
    *
    * @note the @args all must have copy semantics, if some dont you may consider
    * using std::ref to wrap some args, or pass ptrs.
-   * 
+   *
    * @code for example:
-   * 
+   *
    *  std::mutex mtx{};
-   * 
+   *
    *  struct Service
    *  {
    *      static IoCoro Passive(Socket streaming, std::mutex* mtx)
@@ -72,13 +69,13 @@ public:
    *          ...
    *      }
    *  };
-   * 
+   *
    *  ...
    *    ioCoro::Server<Service> server{":1024"};
    *    ...
-   *    
+   *
    *    server.Run(&mtx);
-   *    
+   *
    *
    * @ingroup user-context for server end
    */
