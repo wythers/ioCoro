@@ -60,7 +60,6 @@ Server<Service>::AcceptInit(char const* ip, int port)
 
 template<HasServerEntry Service>
 Server<Service>::Server(char const* host)
-: m_host(host)
 {
   Init(host);
 
@@ -71,7 +70,6 @@ Server<Service>::Server(char const* host)
 template<HasServerEntry Service>
 Server<Service>::Server(char const* host, uint threads)
     : SeviceModelBase{ threads }
-    , m_host(host)
 {
   Init(host);
 
