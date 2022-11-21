@@ -16,17 +16,6 @@ This algorithm, which is due to **T.-Y. Cheung (1983)**, is based on parallel tr
   
 * The message **GO(d)** is not the first message **GO()** received by **p<sub>i</sub>** and **level<sub>i</sub>** > **d + 1**. In that case, **p<sub>i</sub>***(a)* updates its variable **level<sub>i</sub>** to **d + 1**, *(b)* defines the sender of the message GO(d) just received as its new parent, and *(c)* forwards a message **GO(d +1)** to each of its other neighbors **p<sub>k</sub>** in order that they recompute their distances to the root.  
   
-
-
-* The *broadcast* problem is a one-to-many communication problem. It consists in designing an algorithm that allows the distinguished process **p<sub>a</sub>** to disseminate information to the whole set of processes.  
-  
-* The *convergecast* problem is a many-to-one communication problem. It consists in designing an algorithm that allows each process **p<sub>j</sub>** to send information **v<sub>j</sub>** to a distinguished process **p<sub>a</sub>** for it to compute some function **f()**, which is on a vector **[v1,...,vn]** containing one value per process.  
-  
-*Broadcast* and *convergecast* can be seen as dual communication operations. They are usually used as a pair: **p<sub>a</sub>** broadcasts a query to obtain values, one from each process, from which it computes the resulting value **f()**.  
-  
-As a simple example that we will implement: 
-**p<sub>a</sub>** is a process that queries sensors for temperature values, and final out all the values.  
-  
 #### Algorithm  
 ![section3.1](./section3.1.png)  
   
