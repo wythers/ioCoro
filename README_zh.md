@@ -310,7 +310,7 @@ int main()
 2. 你可以按如下方式构建libiocoro:  
 ```bash
 foo@bar:~$ git clone https://github.com/wythers/ioCoro.git
-foo@bar:~$ cd ioCoro && make
+foo@bar:~$ cd ioCoro && ./install.sh
 ```  
 3. include 和 linker
 ```c++

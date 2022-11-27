@@ -292,7 +292,7 @@ In this section, we meet the target of implementing the simple ECHO service step
 2. You can be building the libiocoro as follows:  
 ```bash
 foo@bar:~$ git clone https://github.com/wythers/ioCoro.git
-foo@bar:~$ cd ioCoro && make
+foo@bar:~$ cd ioCoro && ./install.sh
 ```  
 3. Include and linker
 ```c++
