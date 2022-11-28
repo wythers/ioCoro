@@ -194,16 +194,15 @@ ioCoroConnect::waiting(coroutine_handle<> h)
 bool
 ioCoroConnect::await_suspend(std::coroutine_handle<> h)
 {
-  errno = 0;
-
   if (m_s)
     return false; 
 
+  errno = 0;
   /**
    * the ioCoro local host database
    */
-  static mutex hostDB_mtx;
-  static std::unordered_map<string_view, pair<sockaddr, socklen_t>> hostDB;
+  static mutex hostDB_mtx{};
+  static std::unordered_map<std::string, pair<sockaddr, socklen_t>> hostDB{};
 
   int ret{};
   if (std::isalpha(host[0])) {
@@ -228,12 +227,10 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
         return true;
       }
     }
-
+    
     auto pos = string_view{ host }.find(":");
-    char name[pos + 1];
-    strncpy(name, host, pos);
-    name[pos] = '\0';
-
+    std::string name{host, pos};
+    
     addrinfo hints{};
     addrinfo* result{};
 
@@ -241,7 +238,7 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
     hints.ai_socktype = SOCK_STREAM;
 
     for (;;) {
-      int s = getaddrinfo(name, host + pos + 1, &hints, &result);
+      int s = getaddrinfo(name.data(), host + pos + 1, &hints, &result);
       if (s == 0)
         break;
 
@@ -284,16 +281,15 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
     return false;
 
   } else {
+
     auto pos = string_view{ host }.find(":");
-    char ip[pos + 1];
-    strncpy(ip, host, pos);
-    ip[pos] = '\0';
+    std::string ip{host, pos};
 
     int port = atoi(host + pos + 1);
 
     sockaddr_in address{};
     address.sin_family = AF_INET;
-    inet_pton(AF_INET, ip, &address.sin_addr);
+    inet_pton(AF_INET, ip.data(), &address.sin_addr);
     address.sin_port = htons(port);
 
     ret = ::connect(m_s.GetFd(), (struct sockaddr*)&address, sizeof(address));

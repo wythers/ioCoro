@@ -11,6 +11,14 @@ Server<Service>::Init(char const* host)
   string_view checker{ host };
   auto pos = checker.find(":");
 
+  if (pos == string_view::npos) {
+    throw system_error
+    {
+      { errors::fault, std::generic_category() },
+      "the host format error"
+    };
+  }
+
   if (pos == 0 || checker.substr(0, pos) == "localhost") {
     m_port = atoi(host + pos + 1);
     return;
@@ -69,7 +77,7 @@ Server<Service>::Server(char const* host)
 
 template<HasServerEntry Service>
 Server<Service>::Server(char const* host, uint threads)
-    : SeviceModelBase{ threads }
+  : SeviceModelBase{ threads }
 {
   Init(host);
 
