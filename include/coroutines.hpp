@@ -22,7 +22,10 @@ struct IoCoro
 
     std::suspend_always initial_suspend() const noexcept { return {}; }
     std::suspend_never final_suspend() const noexcept { return {}; }
-    void unhandled_exception() {}
+    void unhandled_exception()
+    {
+      std::rethrow_exception(std::current_exception());
+    }
 
     IoCoro get_return_object()
     {

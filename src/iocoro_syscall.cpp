@@ -195,7 +195,7 @@ bool
 ioCoroConnect::await_suspend(std::coroutine_handle<> h)
 {
   if (m_s)
-    return false; 
+    return false;
 
   errno = 0;
   /**
@@ -227,10 +227,17 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
         return true;
       }
     }
-    
+
     auto pos = string_view{ host }.find(":");
-    std::string name{host, pos};
-    
+    if (pos == string_view::npos) {
+      throw system_error
+      { 
+        { errors::fault, std::generic_category() },
+          "the host format error at Client end" 
+      };
+    }
+    std::string name{ host, pos };
+
     addrinfo hints{};
     addrinfo* result{};
 
@@ -283,7 +290,15 @@ ioCoroConnect::await_suspend(std::coroutine_handle<> h)
   } else {
 
     auto pos = string_view{ host }.find(":");
-    std::string ip{host, pos};
+    if (pos == string_view::npos) {
+      throw system_error
+      { 
+        {  errors::fault, std::generic_category() },
+          "the host format error at Client end" 
+      };
+    }
+
+    std::string ip{ host, pos };
 
     int port = atoi(host + pos + 1);
 

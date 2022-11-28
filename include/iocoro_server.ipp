@@ -15,7 +15,7 @@ Server<Service>::Init(char const* host)
     throw system_error
     {
       { errors::fault, std::generic_category() },
-      "the host format error"
+      "the host format error at Server"
     };
   }
 
