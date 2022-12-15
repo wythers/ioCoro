@@ -26,7 +26,7 @@ struct _empty_call_has_return
 };
 
 /**
- *
+ * RTTI deprecated, let user could enable -fno-rtti
  */
 struct Operation
 {
@@ -55,7 +55,7 @@ struct Operation
 };
 
 /**
- *
+ * RTTI deprecated, let user could enable -fno-rtti
  */
 struct MetaOperation : Operation
 {
