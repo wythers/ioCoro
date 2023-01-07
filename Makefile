@@ -12,12 +12,16 @@ IENV      := /usr/local/include
 LENV      := /usr/local/lib
 HOME 	  := $(shell pwd)
 
+ARG1 =
 
 build:
 	@$(SAY) ***building iocoro library...                    [start]
+ifeq "$(ARG1)" ""
 	@$(MAKE) -s --directory=./lib libiocoro.a
+else
+	@$(MAKE) -s --directory=./lib CC=$(ARG1) libiocoro.a 
 	@$(SAY) ***building iocoro library...                    [finish]
-	
+endif
 
 	@$(SAY) ***building environment...                       [start]
 	@$(MKDIR) $(IENV)/iocoro
@@ -26,7 +30,11 @@ build:
 	@$(UPDATELIB)
 	@$(SAY) ***building environment...                       [finish]
 
-#	@$(MAKE) -s --directory=example mods
+ifeq "$(ARG1)" ""
+	@$(MAKE) -s --directory=example mods
+else
+	@$(MAKE) -s --directory=example CC=$(ARG1) mods
+endif
 	
 	@$(SAY) --- All successfully, use -liocoro, as a g++ arg, to linker iocoro library...
 
@@ -36,8 +44,8 @@ clean:
 	@$(MAKE) -s --directory=lib clean-all
 	@$(MAKE) -s --directory=example clean-all
 	@$(SAY) ***restore default environment...                [start]
-	@$(RM) /usr/local/include/iocoro
-	@$(RM) /usr/local/lib/libiocoro.a
+	@$(RM) $(IENV)/iocoro
+	@$(RM) $(LENV)/libiocoro.a
 	@$(SAY) ***restore default environment...                [finish]
 
 	

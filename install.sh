@@ -11,13 +11,19 @@
 #
 
 # make
-GLOBAL_BUILD=make
+GLOBAL_BUILD="make"
 
 # gcc 
-GLOBAL_COMPILER=g++
+GLOBAL_COMPILER="g++"
 
 # 
-GLOBAL_DISTRI=$(lsb_release -a 2>/dev/null | grep "Ubuntu")
+GLOBAL_DEBIAN=$(which apt)
+
+#
+GLOBAL_APTGET="sudo apt install"
+
+#
+GLOBAL_GXX_VERSION="g++-12"
 
 #
 Usage() {
@@ -32,23 +38,33 @@ which ${GLOBAL_BUILD} 1>/dev/null
 
 if [ "$?" -ne "0" ]
 then
-        if [ -n "${GLOBAL_DISTRI}" ]
+        if [ -n "${GLOBAL_DEBIAN}" ]
         then
-                sudo apt install ${GLOBAL_BUILD}
+                ${GLOBAL_APTGET} ${GLOBAL_BUILD}
         else
                 Usage
-
                 exit 1
         fi
 fi
 
 ${GLOBAL_BUILD}
 
-if [ $? -ne "0" ]
+if [ "$?" -ne "0" ]
 then
-        Usage
+        ${GLOBAL_APTGET} ${GLOBAL_GXX_VERSION} 2>/dev/null
 
-        exit 1
+        GLOBAL_GXX=$(which ${GLOBAL_GXX_VERSION})
+        if [ ! -n "${GLOBAL_GXX}" ]
+        then
+                Usage
+                exit 1
+        else
+                echo "alias ${GLOBAL_COMPILER}='${GLOBAL_GXX}'" >> ~/.bashrc
+
+                ${GLOBAL_BUILD} ARG1=${GLOBAL_GXX}
+                echo "--- Please, type the following source command,
+                Use '. ~/.bashrc' to complete env update."
+        fi
 fi
 
-exit 0
+exit $?

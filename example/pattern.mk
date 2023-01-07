@@ -2,6 +2,7 @@ SAY       := echo
 RM        := sudo rm -rf
 MAKE      := make
 SHELL     := /bin/bash
+CC        = g++
 
 define loop
 	@for m in $1;                                         \
@@ -28,8 +29,8 @@ endef
 
 %: %.cpp
 	@$(SAY) cc -o $@
-	@g++ -pthread -fcoroutines -latomic -Wall -std=c++20 -fno-rtti -flto -O3 -Ofast -o $@ $^ -liocoro 2>/dev/null
+	@$(CC) -pthread -fcoroutines -latomic -Wall -std=c++20 -fno-rtti -flto -O3 -Ofast -o $@ $^ -liocoro 2>/dev/null
 
 %.o: %.cpp
 	@$(SAY) cc -c -o $@
-	@g++ -pthread -fcoroutines -latomic -Wall -std=c++20 -fno-rtti -flto -O3 -Ofast -c -o $@ $^ -liocoro 2>/dev/null
+	@$(CC) -pthread -fcoroutines -latomic -Wall -std=c++20 -fno-rtti -flto -O3 -Ofast -c -o $@ $^ -liocoro 2>/dev/null
