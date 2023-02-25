@@ -58,6 +58,11 @@ public:
     m_pool = chunk;
   }
 
+  /**
+   * @note because the graceful deconstruction only happens on the client end, 
+   * and the @interface void reserver(int) is unexposed to the client end,
+   * so its fine
+   */
   ~ObjectPool()
   {
     while (std::unique_ptr<SocketImpl> tmp{ m_pool.load() })
