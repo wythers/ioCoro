@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "cache.hpp"
+
 #include "default_args.hpp"
 #include "mm_order.hpp"
 #include "socket_impl.hpp"
@@ -20,58 +22,33 @@ using std::forward;
 
 namespace ioCoro {
 
-class alignas(CACHE_LINE_SIZE) ObjectPool
+class ObjectPool
 {
 public:
   SocketImpl* allocate()
   {
-    SocketImpl* p = rx_load(m_pool);
-    do {
-      if (!p) {
-        p = new SocketImpl{};
-        return p;
-      }
-    } while (!acq_compare_exchange_weak(m_pool, p, p->Next));
-
-    return p;
+    return pool.Get();
   }
 
   void deallocate(SocketImpl* old)
   {
-    //  memset(static_cast<void*>(old), 0, sizeof(SocketImpl));
     old->Next = nullptr;
     rx_store(old->m_closed, false);
     rx_store(old->Ops.m_to_do, false);
 
-    while (!rel_compare_exchange_weak(m_pool, old->Next, old))
-      ;
+    pool.Put(old);
   }
 
+  // do noting, but keep it for backward compatibility
   void reserver(int num)
   {
-    auto* chunk = new SocketImpl[num]{};
-
-    for (int i = 0; i < num - 1; ++i) {
-      chunk[i].Next = chunk + i + 1;
-    }
-
-    m_pool = chunk;
+    int _ = num;
   }
+  
+  ObjectPool(uint n = 16) : pool(n) {}
 
-  /**
-   * @note because the graceful deconstruction only happens on the client end, 
-   * and the @interface void reserver(int) is unexposed to the client end,
-   * so its fine
-   */
-  ~ObjectPool()
-  {
-    while (std::unique_ptr<SocketImpl> tmp{ m_pool.load() })
-      m_pool = tmp->Next;
-  }
-
-  bool IsEmpty() { return rx_load(m_pool) == nullptr; }
-
-  atomic<SocketImpl*> m_pool{};
+private:                  
+  zeus::Pool<SocketImpl> pool{};
 };
 
 } // namespace ioCoro

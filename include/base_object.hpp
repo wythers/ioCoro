@@ -50,7 +50,9 @@ public:
   SeviceModelBase() = default;
   SeviceModelBase(SeviceModelBase const&) = delete;
 
-  SeviceModelBase(uint threads) : m_tasks(threads)
+  SeviceModelBase(uint threads) 
+  : m_objects(threads)
+  , m_tasks(threads)
   {}
 
 protected:
