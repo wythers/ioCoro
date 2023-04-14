@@ -446,11 +446,16 @@ class Pool {
   };
 
  public:
-  Pool() {
+  Pool(uint num = std::thread::hardware_concurrency() * 2)
+  : hazards(num)
+  , buddies(num)
+  , refs(num)
+  , ids(num)
+  {
     static_assert(is_always_lock_free(),
                   "the platform does not support lock-free atomic operation");
+    clusterSize = num;
   }
-
   ~Pool() { cache.last = true; }
 
   Pool(Pool const&) = delete;
@@ -535,15 +540,6 @@ class Pool {
     return {Volumn::NumOfVolumns, Circle::NumOfCirs};
   }
 #endif
-
-  Pool(uint num)
-  : hazards(num)
-  , buddies(num)
-  , refs(num)
-  , ids(num)
-  {
-    clusterSize = num;
-  }
 
   // issue:972
   // inline static Buddy_t buddies[clusterSize]{};
