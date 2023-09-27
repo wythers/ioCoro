@@ -42,7 +42,7 @@ public:
   // do noting, but keep it for backward compatibility
   void reserver(int num)
   {
-    int _ = num;
+    [[maybe_unused]] int _ = num;
   }
   
   ObjectPool(uint n = 16) : pool(n) {}

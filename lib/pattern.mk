@@ -34,6 +34,8 @@ endef
 %.o: %.cpp
 	@$(SAY) cc -c -o $@
 	$(fexist)
-	@$(CC) -pthread -fcoroutines -latomic -I ../include -Wall -fno-rtti -flto -Ofast -std=c++20 -O3 -c -o $@ $< $(lib) 2>/dev/null
+	@$(CC) -pthread -fcoroutines -latomic -I ../include -Wall -fno-rtti \
+	-flto -std=c++20 -O3 -fdelayed-branch -fif-conversion2 \
+	-fmove-loop-invariants -falign-functions -falign-labels -falign-loops -march=native -ffast-math -c -o $@ $< $(lib) 2>/dev/null
 	@$(AR) -r $(lib) $@ 2>/dev/null
 
